@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: b6e2cf8956c8c6b4382c20eb6de2ae8d, type: 2}
-  m_sharedMaterial: {fileID: 4177776446614360513, guid: b6e2cf8956c8c6b4382c20eb6de2ae8d, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 803e9d4a9c8f4cd4ba7d03f69145b5ad, type: 2}
+  m_sharedMaterial: {fileID: 4177776446614360513, guid: 803e9d4a9c8f4cd4ba7d03f69145b5ad, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -202,7 +202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d63ad3a8e7e3ca42b3424809f25151f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildingData: {fileID: 0}
+  buildingData: {fileID: 11400000, guid: 11b75ba1290db354284cbe69a08513d6, type: 2}
   interactPrompt: {fileID: 8009131599489510572}
   promptText: {fileID: 3729745521278338707}
 --- !u!1 &8009131599489510572
