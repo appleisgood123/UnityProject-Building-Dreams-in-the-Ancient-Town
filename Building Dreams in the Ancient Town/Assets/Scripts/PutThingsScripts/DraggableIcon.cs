@@ -159,10 +159,9 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (previewInstance == null || !canPlace || buildingData == null) return;
 
-        // 调用 BuildingManager 尝试建造
-        if (BuildingManager.Instance.ConstructBuilding(buildingData, previewInstance.transform.position))
+        // 传递位置和旋转角度
+        if (BuildingManager.Instance.ConstructBuilding(buildingData, previewInstance.transform.position, previewInstance.transform.rotation))
         {
-            // 建造成功音效特效
             if (placementSound != null)
                 AudioSource.PlayClipAtPoint(placementSound, previewInstance.transform.position);
             if (placementEffect != null)
@@ -174,9 +173,7 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         else
         {
             Debug.LogWarning("建造条件不足！");
-            // 可以在这里弹出提示
         }
-
         EndDragCleanup();
     }
 
@@ -210,7 +207,6 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             bool overlapping = CheckOverlap();
 
             canPlace = onGround && canBuild && !overlapping;
-
             ApplyMaterialToPreview(canPlace ? validPlacementMaterial : invalidPlacementMaterial);
         }
         else
@@ -242,6 +238,7 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
         return false;
     }
+
     private void EndDragCleanup()
     {
         if (previewInstance != null)

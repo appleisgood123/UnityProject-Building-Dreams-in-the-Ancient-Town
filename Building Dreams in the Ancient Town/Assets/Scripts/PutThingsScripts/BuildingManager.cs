@@ -52,29 +52,30 @@ public class BuildingManager : MonoBehaviour
     {
         if (building == null) return false;
 
-        // 1. 资源检查
+        // 资源检查
         if (!ResourceManager.Instance.CanAfford(building.costSilver, building.costWood, building.costStone))
             return false;
 
-        // 2. 幸福度检查
+        // 幸福度检查
         if (ResourceManager.Instance.Happiness < building.requiredHappiness)
             return false;
 
-        // 3. 科技解锁检查（如果需要）
+        // 科技解锁检查（如果需要）
         if (building.requireTechUnlock)
         {
             if (TechManager.Instance == null) return false;
             if (!TechManager.Instance.IsBuildingUnlocked(building)) return false;
         }
 
-        // 4. 前置建筑检查
+        // 前置建筑检查
         if (building.requiredBuilding != null && !constructedBuildings.Contains(building.requiredBuilding))
             return false;
 
         return true;
     }
 
-    public bool ConstructBuilding(BuildingDataSO building, Vector3 position)
+    // 修改：增加旋转参数
+    public bool ConstructBuilding(BuildingDataSO building, Vector3 position, Quaternion rotation)
     {
         if (!CanBuild(building)) return false;
 
@@ -82,7 +83,7 @@ public class BuildingManager : MonoBehaviour
 
         if (building.finalPrefab != null)
         {
-            GameObject newBuilding = Instantiate(building.finalPrefab, position, Quaternion.identity);
+            GameObject newBuilding = Instantiate(building.finalPrefab, position, rotation);
             BuildingInteraction interaction = newBuilding.GetComponent<BuildingInteraction>();
             if (interaction != null)
                 interaction.buildingData = building;
