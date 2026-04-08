@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+// 枚举定义（只在此文件中保留）
 public enum TechEffectType
 {
     None,

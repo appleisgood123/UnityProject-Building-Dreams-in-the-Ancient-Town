@@ -25,6 +25,9 @@ public class BuildingDataSO : ScriptableObject
     [Header("是否需要科技解锁")]
     public bool requireTechUnlock;
 
+    [Header("放置设置")]
+    public bool ignoreGroundCheck = false;   // 桥等可忽略地面限制
+
     [Header("收益（立即生效）")]
     public int incomeHappiness;
     public int populationCapIncrease;
