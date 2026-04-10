@@ -48,7 +48,6 @@ public class TechManager : MonoBehaviour
         ApplyTechEffect(tech);
         OnTechUnlocked?.Invoke(tech);
 
-        // 触发任务检查
         if (TaskManager.Instance != null)
             TaskManager.Instance.CheckTaskProgress();
 
@@ -80,7 +79,6 @@ public class TechManager : MonoBehaviour
 
     public List<TechNodeData> GetAllTechNodes() => allTechNodes;
 
-    // 获取所有已解锁的建筑（由科技解锁的）
     public List<BuildingDataSO> GetUnlockedBuildings()
     {
         List<BuildingDataSO> result = new List<BuildingDataSO>();
@@ -90,7 +88,6 @@ public class TechManager : MonoBehaviour
         return result;
     }
 
-    // 检查某个建筑是否已被科技解锁
     public bool IsBuildingUnlocked(BuildingDataSO building)
     {
         foreach (var tech in unlockedTechs)
@@ -101,7 +98,6 @@ public class TechManager : MonoBehaviour
         return false;
     }
 
-    // 根据名称检查科技是否已解锁（用于任务系统）
     public bool IsTechUnlocked(string techName)
     {
         foreach (var tech in unlockedTechs)

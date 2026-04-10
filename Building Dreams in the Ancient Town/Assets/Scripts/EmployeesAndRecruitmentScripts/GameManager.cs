@@ -6,9 +6,10 @@ using UnityEngine.Events;
 public class GameManager : MonoBehaviour
 {
     private static GameManager _instance;
+    public static GameManager Instance => _instance;
 
     [Header("数据表引用")]
-    public EmployeeTable employeeTable;   // Inspector 中拖拽
+    public EmployeeTable employeeTable;
 
     [SerializeField] private int startCurrency = 1000;
     private int currentCurrency;
@@ -19,11 +20,6 @@ public class GameManager : MonoBehaviour
     private EmployeeData currentCandidate;
     private List<EmployeeData> employeeList = new List<EmployeeData>();
     private int currentIndex = -1;
-
-    public static GameManager Instance
-    {
-        get { return _instance; }
-    }
 
     private void Awake()
     {
@@ -38,10 +34,7 @@ public class GameManager : MonoBehaviour
         currentCurrency = startCurrency;
     }
 
-    private void Start()
-    {
-        RefreshRecruitCandidate();
-    }
+    private void Start() => RefreshRecruitCandidate();
 
     public EmployeeTable GetEmployeeTable()
     {
@@ -70,21 +63,21 @@ public class GameManager : MonoBehaviour
         EmployeeTable table = GetEmployeeTable();
         if (table == null) return null;
 
-        List<EmployeeTableItem> list = table.DataList;
+        var list = table.DataList;
         if (list == null || list.Count == 0) return null;
 
         currentIndex++;
         if (currentIndex >= list.Count) currentIndex = 0;
 
-        EmployeeTableItem item = list[currentIndex];
-
+        var item = list[currentIndex];
         currentCandidate = new EmployeeData()
         {
             uid = Guid.NewGuid().ToString(),
             id = item.id,
             employeeName = item.employeeName,
             avatarSprite = item.avatarSprite,
-            cost = item.cost
+            cost = item.cost,
+            jobType = item.jobType   // 从表中读取职业
         };
         return currentCandidate;
     }
@@ -96,15 +89,15 @@ public class GameManager : MonoBehaviour
         if (currentCandidate == null) return false;
         if (!SpendCurrency(currentCandidate.cost)) return false;
 
-        EmployeeData newEmployee = new EmployeeData()
+        employeeList.Add(new EmployeeData()
         {
             uid = currentCandidate.uid,
             id = currentCandidate.id,
             employeeName = currentCandidate.employeeName,
             avatarSprite = currentCandidate.avatarSprite,
-            cost = currentCandidate.cost
-        };
-        employeeList.Add(newEmployee);
+            cost = currentCandidate.cost,
+            jobType = currentCandidate.jobType
+        });
         RefreshRecruitCandidate();
         return true;
     }
@@ -115,5 +108,15 @@ public class GameManager : MonoBehaviour
     {
         if (uidList == null || uidList.Count == 0) return;
         employeeList.RemoveAll(x => uidList.Contains(x.uid));
+    }
+
+    public EmployeeData GetEmployeeByUID(string uid)
+    {
+        return employeeList.Find(emp => emp.uid == uid);
+    }
+
+    public List<EmployeeData> GetIdleEmployeesByJobType(EmployeeJobType jobType)
+    {
+        return employeeList.FindAll(emp => string.IsNullOrEmpty(emp.assignedBuildingUID) && emp.jobType == jobType);
     }
 }

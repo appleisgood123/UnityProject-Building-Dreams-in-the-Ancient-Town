@@ -12,6 +12,7 @@ public class EmployeeTableItem
 {
     public int id;
     public string employeeName;
-    public Sprite avatarSprite;   // 直接拖拽图片
+    public Sprite avatarSprite;
     public int cost;
+    public EmployeeJobType jobType;   // 员工职业
 }

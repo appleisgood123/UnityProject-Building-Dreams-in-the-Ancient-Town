@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// 枚举定义（确保在文件顶部）
 public enum EmployeePanelMode
 {
     Normal,
@@ -34,26 +35,25 @@ public class EmployeePanel : MonoBehaviour
 
     private void InitUI()
     {
-        UIScrollView = transform.Find("Center/Scroll View").GetComponent<ScrollRect>();
-        UIFireBtn = transform.Find("Bottom/BottomMenus/FireBtn").GetComponent<Button>();
-        UIConfirmFireBtn = transform.Find("Bottom/DelectPanel/ConfirmFireBtn").GetComponent<Button>();
-        UICancelFireBtn = transform.Find("Bottom/DelectPanel/CancelFireBtn").GetComponent<Button>();
-        UICloseBtn = transform.Find("RightTop/CloseBtn").GetComponent<Button>();
+        UIScrollView = transform.Find("Center/Scroll View")?.GetComponent<ScrollRect>();
+        UIFireBtn = transform.Find("Bottom/BottomMenus/FireBtn")?.GetComponent<Button>();
+        UIConfirmFireBtn = transform.Find("Bottom/DelectPanel/ConfirmFireBtn")?.GetComponent<Button>();
+        UICancelFireBtn = transform.Find("Bottom/DelectPanel/CancelFireBtn")?.GetComponent<Button>();
+        UICloseBtn = transform.Find("RightTop/CloseBtn")?.GetComponent<Button>();
 
-        UIFireBtn.onClick.AddListener(OnClickFireMode);
-        UIConfirmFireBtn.onClick.AddListener(OnClickConfirmFire);
-        UICancelFireBtn.onClick.AddListener(OnClickCancelFire);
-        UICloseBtn.onClick.AddListener(OnClickClose);
+        if (UIFireBtn != null) UIFireBtn.onClick.AddListener(OnClickFireMode);
+        if (UIConfirmFireBtn != null) UIConfirmFireBtn.onClick.AddListener(OnClickConfirmFire);
+        if (UICancelFireBtn != null) UICancelFireBtn.onClick.AddListener(OnClickCancelFire);
+        if (UICloseBtn != null) UICloseBtn.onClick.AddListener(OnClickClose);
     }
 
     public void RefreshList()
     {
-        RectTransform content = UIScrollView.content;
+        if (UIScrollView == null || UIScrollView.content == null) return;
 
+        RectTransform content = UIScrollView.content;
         for (int i = content.childCount - 1; i >= 0; i--)
-        {
             Destroy(content.GetChild(i).gameObject);
-        }
 
         List<EmployeeData> list = GameManager.Instance.GetEmployeeList();
         foreach (EmployeeData data in list)
@@ -77,9 +77,9 @@ public class EmployeePanel : MonoBehaviour
     private void RefreshModeUI()
     {
         bool isFireMode = curMode == EmployeePanelMode.Fire;
-        UIFireBtn.gameObject.SetActive(!isFireMode);
-        UIConfirmFireBtn.gameObject.SetActive(isFireMode);
-        UICancelFireBtn.gameObject.SetActive(isFireMode);
+        if (UIFireBtn != null) UIFireBtn.gameObject.SetActive(!isFireMode);
+        if (UIConfirmFireBtn != null) UIConfirmFireBtn.gameObject.SetActive(isFireMode);
+        if (UICancelFireBtn != null) UICancelFireBtn.gameObject.SetActive(isFireMode);
     }
 
     private void OnClickFireMode()
