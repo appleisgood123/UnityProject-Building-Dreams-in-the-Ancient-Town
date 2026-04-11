@@ -202,16 +202,16 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             previewInstance.transform.position = hit.point;
 
-            bool canBuild = BuildingManager.Instance.CanBuild(buildingData);
-
+            // 对于忽略地面检查的建筑，不检查地面层和重叠
             if (buildingData.ignoreGroundCheck)
             {
-                // 忽略地面检查的桥：不检查地面层、不检查重叠，只检查建造条件
-                canPlace = canBuild;
+                // 只检查建造条件（资源、科技等），位置任意
+                canPlace = BuildingManager.Instance.CanBuild(buildingData);
             }
             else
             {
                 bool onGround = ((1 << hit.collider.gameObject.layer) & groundLayer) != 0;
+                bool canBuild = BuildingManager.Instance.CanBuild(buildingData);
                 bool overlapping = CheckOverlap();
                 canPlace = onGround && canBuild && !overlapping;
             }
