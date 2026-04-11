@@ -1,16 +1,12 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class BuildingInfoPanel : MonoBehaviour
 {
     public static BuildingInfoPanel Instance;
 
-    [Header("主内容面板（必须拖拽）")]
-    public GameObject contentPanel;              // 请将 PanelContent 拖到这里
-
-    [Header("UI组件")]
+    public GameObject panel;
     public TextMeshProUGUI nameText;
     public Image displayImage;
     public TextMeshProUGUI descriptionText;
@@ -18,12 +14,6 @@ public class BuildingInfoPanel : MonoBehaviour
     public TextMeshProUGUI immediateText;
     public Button closeButton;
 
-    [Header("员工管理")]
-    public TextMeshProUGUI employeeStatusText;
-    public GameObject employeeSelectionPanel;
-    public TMP_FontAsset employeeButtonFont;
-
-    private BuildingInstance currentBuilding;
     public System.Action OnPanelClosed;
 
     private void Awake()
@@ -33,86 +23,78 @@ public class BuildingInfoPanel : MonoBehaviour
         else
             Destroy(gameObject);
 
-        if (contentPanel != null)
-            contentPanel.SetActive(false);
-        else
-            Debug.LogError("BuildingInfoPanel: contentPanel 未赋值！请将 PanelContent 拖入。");
+        if (panel != null)
+            panel.SetActive(false);
 
         if (closeButton != null)
-        {
-            closeButton.onClick.RemoveAllListeners();
-            closeButton.onClick.AddListener(Close);
-        }
+            closeButton.onClick.AddListener(OnCloseButtonClicked);
+    }
 
-        if (employeeStatusText != null)
-        {
-            Button statusBtn = employeeStatusText.GetComponent<Button>();
-            if (statusBtn == null)
-                statusBtn = employeeStatusText.gameObject.AddComponent<Button>();
-            statusBtn.onClick.RemoveAllListeners();
-            statusBtn.onClick.AddListener(OnEmployeeStatusClicked);
-        }
-
-        if (employeeSelectionPanel != null)
-            employeeSelectionPanel.SetActive(false);
+    private void OnCloseButtonClicked()
+    {
+        Close();
     }
 
     public void Close()
     {
-        if (contentPanel == null)
-        {
-            Debug.LogError("contentPanel is null! Please assign it in Inspector.");
-            return;
-        }
-        if (!contentPanel.activeSelf) return;
-        contentPanel.SetActive(false);
+        if (!panel.activeSelf) return;
+
+        panel.SetActive(false);
         OnPanelClosed?.Invoke();
+
         if (MouseManager.Instance != null)
             MouseManager.Instance.SetCursorVisible(false);
         if (GamePauseManager.Instance != null)
             GamePauseManager.Instance.RequestResume();
-        Debug.Log("建筑信息面板已关闭 (contentPanel active = " + contentPanel.activeSelf + ")");
     }
 
-    public void Show(BuildingDataSO data, BuildingInstance buildingInstance)
+    public void Show(BuildingDataSO data)
     {
         if (data == null) return;
-        currentBuilding = buildingInstance;
 
         if (MouseManager.Instance != null)
             MouseManager.Instance.SetCursorVisible(true);
         if (GamePauseManager.Instance != null)
             GamePauseManager.Instance.RequestPause();
 
-        nameText.text = data.buildingName;
+        if (nameText != null)
+            nameText.text = data.buildingName;
+
+        // 处理展示图片
         if (displayImage != null)
         {
+            displayImage.gameObject.SetActive(true); // 先激活，确保上次隐藏的不影响
             if (data.displayImage != null)
+            {
                 displayImage.sprite = data.displayImage;
+                Debug.Log($"设置图片：{data.displayImage.name}");
+            }
             else
-                displayImage.gameObject.SetActive(false);
+            {
+                displayImage.gameObject.SetActive(false); // 无图片则隐藏
+                Debug.LogWarning($"建筑 {data.buildingName} 未设置 displayImage");
+            }
         }
-        descriptionText.text = data.description;
 
+        if (descriptionText != null)
+            descriptionText.text = data.description;
+
+        // 收益显示
         string monthly = "";
         if (data.monthlySilver > 0) monthly += $"银两+{data.monthlySilver} ";
         if (data.monthlyWood > 0) monthly += $"木材+{data.monthlyWood} ";
         if (data.monthlyStone > 0) monthly += $"砖石+{data.monthlyStone} ";
         if (string.IsNullOrEmpty(monthly)) monthly = "无";
-        incomeText.text = $"每月收益：{monthly}";
+        if (incomeText != null)
+            incomeText.text = $"每月收益：{monthly}";
 
         string immediate = "";
         if (data.incomeHappiness > 0) immediate += $"幸福度+{data.incomeHappiness} ";
         if (data.populationCapIncrease > 0) immediate += $"人口上限+{data.populationCapIncrease} ";
         if (string.IsNullOrEmpty(immediate)) immediate = "无";
-        immediateText.text = $"立即收益：{immediate}";
+        if (immediateText != null)
+            immediateText.text = $"立即收益：{immediate}";
 
-        RefreshEmployeeStatus();
-        contentPanel.SetActive(true);
-        Debug.Log("建筑信息面板已显示");
+        panel.SetActive(true);
     }
-
-    private void RefreshEmployeeStatus() { /* 保持不变 */ }
-    private void OnEmployeeStatusClicked() { /* 保持不变 */ }
-    private void OnSelectEmployee(string employeeUID) { /* 保持不变 */ }
 }

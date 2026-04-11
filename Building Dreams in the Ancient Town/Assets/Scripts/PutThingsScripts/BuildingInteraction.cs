@@ -3,16 +3,11 @@ using TMPro;
 
 public class BuildingInteraction : MonoBehaviour
 {
-    [Header("建筑数据（由BuildingManager自动赋值）")]
     public BuildingDataSO buildingData;
-
-    [Header("交互提示UI")]
     public GameObject interactPrompt;
     public TextMeshProUGUI promptText;
 
     private bool playerInRange = false;
-    private float lastToggleTime = 0f;
-    private const float TOGGLE_COOLDOWN = 0.2f; // 防止快速切换
 
     private void Start()
     {
@@ -34,11 +29,8 @@ public class BuildingInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = true;
-            if (BuildingInfoPanel.Instance != null && !BuildingInfoPanel.Instance.contentPanel.activeSelf)
-            {
-                interactPrompt.SetActive(true);
-                if (promptText != null) promptText.text = "按 F 查看信息";
-            }
+            InteractionManager.Instance.SetCurrentInteractable(this);
+            UpdatePrompt();
         }
     }
 
@@ -47,47 +39,25 @@ public class BuildingInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = false;
+            HidePrompt();
+            InteractionManager.Instance.ClearCurrentInteractable(this);
+        }
+    }
+
+    private void UpdatePrompt()
+    {
+        if (BuildingInfoPanel.Instance != null && BuildingInfoPanel.Instance.panel.activeSelf)
+            return; // 面板已打开，不显示提示
+
+        if (playerInRange && InteractionManager.Instance.currentInteractable == this)
+        {
+            interactPrompt.SetActive(true);
+            if (promptText != null) promptText.text = "按 F 查看信息";
+        }
+        else
+        {
             interactPrompt.SetActive(false);
         }
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.F) && Time.time > lastToggleTime + TOGGLE_COOLDOWN)
-        {
-            lastToggleTime = Time.time;
-            if (BuildingInfoPanel.Instance != null)
-            {
-                if (BuildingInfoPanel.Instance.contentPanel.activeSelf)
-                {
-                    BuildingInfoPanel.Instance.Close();
-                }
-                else if (playerInRange)
-                {
-                    Interact();
-                }
-            }
-        }
-    }
-
-    public void Interact()
-    {
-        if (!playerInRange) return;
-        if (buildingData == null)
-        {
-            Debug.LogWarning($"Building {gameObject.name} has no buildingData assigned.");
-            return;
-        }
-
-        BuildingInstance instance = GetComponent<BuildingInstance>();
-        if (instance == null)
-        {
-            Debug.LogWarning($"Building {gameObject.name} has no BuildingInstance component.");
-            return;
-        }
-
-        BuildingInfoPanel.Instance.Show(buildingData, instance);
-        HidePrompt();
     }
 
     public void HidePrompt()
@@ -96,12 +66,49 @@ public class BuildingInteraction : MonoBehaviour
             interactPrompt.SetActive(false);
     }
 
+    public void Interact()
+    {
+        if (!playerInRange) return;
+
+        if (BuildingInfoPanel.Instance != null && BuildingInfoPanel.Instance.panel.activeSelf)
+        {
+            // 如果面板已打开，则关闭
+            BuildingInfoPanel.Instance.Close();
+        }
+        else
+        {
+            // 打开面板
+            if (buildingData == null)
+            {
+                Debug.LogWarning("buildingData is null");
+                return;
+            }
+            BuildingInfoPanel.Instance.Show(buildingData);
+            HidePrompt(); // 打开面板后隐藏提示
+        }
+    }
+
     private void OnInfoPanelClosed()
     {
-        if (playerInRange)
+        // 面板关闭时，如果玩家仍在范围内，重新显示提示
+        if (playerInRange && InteractionManager.Instance.currentInteractable == this)
         {
             interactPrompt.SetActive(true);
             if (promptText != null) promptText.text = "按 F 查看信息";
+        }
+    }
+
+    // 此方法现在由 Update 调用改为由管理器调用，但为了保持灵活性，也可以保留 Update 但调用管理器
+    private void Update()
+    {
+        // 如果当前建筑是玩家所在且是当前交互目标，按F键由管理器统一处理
+        // 这样避免重复
+        if (playerInRange && InteractionManager.Instance.currentInteractable == this)
+        {
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                InteractionManager.Instance.TryInteract();
+            }
         }
     }
 }

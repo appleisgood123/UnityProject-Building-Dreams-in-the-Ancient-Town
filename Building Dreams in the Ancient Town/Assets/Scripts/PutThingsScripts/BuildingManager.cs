@@ -7,9 +7,9 @@ public class BuildingManager : MonoBehaviour
     public static BuildingManager Instance;
 
     private List<BuildingDataSO> constructedBuildings = new List<BuildingDataSO>();
-    private List<BuildingInstance> allBuildingInstances = new List<BuildingInstance>();
     private float accumulatedMonths = 0f;
 
+    // 科技带来的建筑幸福度加成
     private Dictionary<BuildingDataSO, int> happinessBonusFromTech = new Dictionary<BuildingDataSO, int>();
 
     private void Awake()
@@ -47,28 +47,34 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
+    // 检查是否可建造（资源 + 可选科技解锁 + 前置 + 幸福度）
     public bool CanBuild(BuildingDataSO building)
     {
         if (building == null) return false;
 
+        // 资源检查
         if (!ResourceManager.Instance.CanAfford(building.costSilver, building.costWood, building.costStone))
             return false;
 
+        // 幸福度检查
         if (ResourceManager.Instance.Happiness < building.requiredHappiness)
             return false;
 
+        // 科技解锁检查（如果需要）
         if (building.requireTechUnlock)
         {
             if (TechManager.Instance == null) return false;
             if (!TechManager.Instance.IsBuildingUnlocked(building)) return false;
         }
 
+        // 前置建筑检查
         if (building.requiredBuilding != null && !constructedBuildings.Contains(building.requiredBuilding))
             return false;
 
         return true;
     }
 
+    // 修改：增加旋转参数
     public bool ConstructBuilding(BuildingDataSO building, Vector3 position, Quaternion rotation)
     {
         if (!CanBuild(building)) return false;
@@ -77,16 +83,15 @@ public class BuildingManager : MonoBehaviour
 
         if (building.finalPrefab != null)
         {
-            GameObject newBuildingObj = Instantiate(building.finalPrefab, position, rotation);
-            BuildingInstance instance = newBuildingObj.GetComponent<BuildingInstance>();
-            if (instance == null)
-                instance = newBuildingObj.AddComponent<BuildingInstance>();
-            instance.data = building;
-            allBuildingInstances.Add(instance);
+            GameObject newBuilding = Instantiate(building.finalPrefab, position, rotation);
+            BuildingInteraction interaction = newBuilding.GetComponent<BuildingInteraction>();
+            if (interaction != null)
+                interaction.buildingData = building;
         }
 
         constructedBuildings.Add(building);
 
+        // 立即应用收益
         ResourceManager.Instance.IncreasePopulationCap(building.populationCapIncrease);
         ResourceManager.Instance.AddHappiness(building.incomeHappiness);
 
@@ -95,6 +100,7 @@ public class BuildingManager : MonoBehaviour
         if (building.stoneCapIncrease > 0)
             ResourceManager.Instance.IncreaseStoneCap(building.stoneCapIncrease);
 
+        // 触发任务检查
         if (TaskManager.Instance != null)
             TaskManager.Instance.CheckTaskProgress();
 
@@ -104,12 +110,8 @@ public class BuildingManager : MonoBehaviour
     public void ApplyMonthlyIncome()
     {
         int totalSilver = 0, totalWood = 0, totalStone = 0;
-        foreach (var instance in allBuildingInstances)
+        foreach (var building in constructedBuildings)
         {
-            var building = instance.data;
-            if (building.requiresEmployeeToWork && !instance.IsFullyStaffed())
-                continue;
-
             totalSilver += Mathf.RoundToInt(building.monthlySilver * ResourceManager.Instance.silverIncomeMultiplier);
             totalWood += Mathf.RoundToInt(building.monthlyWood * ResourceManager.Instance.woodIncomeMultiplier);
             totalStone += Mathf.RoundToInt(building.monthlyStone * ResourceManager.Instance.stoneIncomeMultiplier);
@@ -118,34 +120,13 @@ public class BuildingManager : MonoBehaviour
     }
 
     public List<BuildingDataSO> GetConstructedBuildings() => constructedBuildings;
-    public int GetBuiltCount(string buildingName) => constructedBuildings.Count(b => b.buildingName == buildingName);
-    public BuildingInstance GetBuildingInstanceByUID(string uid) => allBuildingInstances.Find(inst => inst.uid == uid);
-    public List<BuildingInstance> GetAllBuildingInstances() => allBuildingInstances;
 
-    public bool AssignEmployeeToBuilding(string employeeUID, BuildingInstance building)
+    public int GetBuiltCount(string buildingName)
     {
-        if (building == null) return false;
-        if (building.AssignEmployee(employeeUID))
-        {
-            EmployeeData emp = GameManager.Instance.GetEmployeeByUID(employeeUID);
-            if (emp != null) emp.assignedBuildingUID = building.uid;
-            return true;
-        }
-        return false;
+        return constructedBuildings.Count(b => b.buildingName == buildingName);
     }
 
-    public bool RemoveEmployeeFromBuilding(string employeeUID, BuildingInstance building)
-    {
-        if (building == null) return false;
-        if (building.RemoveEmployee(employeeUID))
-        {
-            EmployeeData emp = GameManager.Instance.GetEmployeeByUID(employeeUID);
-            if (emp != null) emp.assignedBuildingUID = "";
-            return true;
-        }
-        return false;
-    }
-
+    // 科技带来的幸福度加成
     public void AddHappinessBonus(BuildingDataSO building, int bonus)
     {
         if (building == null) return;
