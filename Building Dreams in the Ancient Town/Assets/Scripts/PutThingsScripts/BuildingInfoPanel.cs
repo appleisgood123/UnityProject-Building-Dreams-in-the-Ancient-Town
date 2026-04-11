@@ -8,7 +8,7 @@ public class BuildingInfoPanel : MonoBehaviour
     public static BuildingInfoPanel Instance;
 
     [Header("主内容面板（必须拖拽）")]
-    public GameObject contentPanel;              // 包含所有UI内容的子物体
+    public GameObject contentPanel;              // 请将 PanelContent 拖到这里
 
     [Header("UI组件")]
     public TextMeshProUGUI nameText;
@@ -33,11 +33,10 @@ public class BuildingInfoPanel : MonoBehaviour
         else
             Destroy(gameObject);
 
-        // 初始隐藏内容面板
         if (contentPanel != null)
             contentPanel.SetActive(false);
         else
-            Debug.LogError("BuildingInfoPanel: contentPanel 未赋值！");
+            Debug.LogError("BuildingInfoPanel: contentPanel 未赋值！请将 PanelContent 拖入。");
 
         if (closeButton != null)
         {
@@ -60,14 +59,19 @@ public class BuildingInfoPanel : MonoBehaviour
 
     public void Close()
     {
-        if (contentPanel == null || !contentPanel.activeSelf) return;
+        if (contentPanel == null)
+        {
+            Debug.LogError("contentPanel is null! Please assign it in Inspector.");
+            return;
+        }
+        if (!contentPanel.activeSelf) return;
         contentPanel.SetActive(false);
         OnPanelClosed?.Invoke();
         if (MouseManager.Instance != null)
             MouseManager.Instance.SetCursorVisible(false);
         if (GamePauseManager.Instance != null)
             GamePauseManager.Instance.RequestResume();
-        Debug.Log("建筑信息面板已关闭");
+        Debug.Log("建筑信息面板已关闭 (contentPanel active = " + contentPanel.activeSelf + ")");
     }
 
     public void Show(BuildingDataSO data, BuildingInstance buildingInstance)
@@ -108,8 +112,7 @@ public class BuildingInfoPanel : MonoBehaviour
         Debug.Log("建筑信息面板已显示");
     }
 
-    // 其余方法保持不变...
-    private void RefreshEmployeeStatus() { /* 原代码 */ }
-    private void OnEmployeeStatusClicked() { /* 原代码 */ }
-    private void OnSelectEmployee(string employeeUID) { /* 原代码 */ }
+    private void RefreshEmployeeStatus() { /* 保持不变 */ }
+    private void OnEmployeeStatusClicked() { /* 保持不变 */ }
+    private void OnSelectEmployee(string employeeUID) { /* 保持不变 */ }
 }

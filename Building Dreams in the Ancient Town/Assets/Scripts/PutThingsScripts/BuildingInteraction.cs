@@ -11,6 +11,8 @@ public class BuildingInteraction : MonoBehaviour
     public TextMeshProUGUI promptText;
 
     private bool playerInRange = false;
+    private float lastToggleTime = 0f;
+    private const float TOGGLE_COOLDOWN = 0.2f; // 防止快速切换
 
     private void Start()
     {
@@ -32,7 +34,6 @@ public class BuildingInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = true;
-            // 只有当信息面板未打开时才显示提示
             if (BuildingInfoPanel.Instance != null && !BuildingInfoPanel.Instance.contentPanel.activeSelf)
             {
                 interactPrompt.SetActive(true);
@@ -52,15 +53,19 @@ public class BuildingInteraction : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.F) && Time.time > lastToggleTime + TOGGLE_COOLDOWN)
         {
-            if (BuildingInfoPanel.Instance != null && BuildingInfoPanel.Instance.contentPanel.activeSelf)
+            lastToggleTime = Time.time;
+            if (BuildingInfoPanel.Instance != null)
             {
-                BuildingInfoPanel.Instance.Close();   // 关闭面板
-            }
-            else if (playerInRange)
-            {
-                Interact();                          // 打开面板
+                if (BuildingInfoPanel.Instance.contentPanel.activeSelf)
+                {
+                    BuildingInfoPanel.Instance.Close();
+                }
+                else if (playerInRange)
+                {
+                    Interact();
+                }
             }
         }
     }
@@ -68,7 +73,6 @@ public class BuildingInteraction : MonoBehaviour
     public void Interact()
     {
         if (!playerInRange) return;
-
         if (buildingData == null)
         {
             Debug.LogWarning($"Building {gameObject.name} has no buildingData assigned.");
