@@ -1891,7 +1891,6 @@ GameObject:
   - component: {fileID: 154955585}
   - component: {fileID: 154955588}
   - component: {fileID: 154955589}
-  - component: {fileID: 154955590}
   - component: {fileID: 154955594}
   - component: {fileID: 154955591}
   - component: {fileID: 154955592}
@@ -1986,10 +1985,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0cd925920fc5e9479f3a7ff0e67e4be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startSilver: 10000
-  startWood: 10000
-  startStone: 10000
-  startHappiness: 1000
+  startSilver: 500
+  startWood: 100
+  startStone: 0
+  startHappiness: 20
   startPopulationCap: 0
   startTechPoints: 100
   startWoodCap: 100
@@ -2032,19 +2031,6 @@ MonoBehaviour:
   switchKey: 113
   mouseManager: {fileID: 154955588}
   isGodView: 0
---- !u!114 &154955590
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 154955582}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abe808234a9a98b4fadb4b7e553415d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  techTreePanel: {fileID: 2084946223}
 --- !u!114 &154955591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2439,63 +2425,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f3ad05a50fff5324e83b4e23804b9485, type: 3}
---- !u!1001 &172302671
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -27.339321
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.010005951
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -15.61
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 919132149155446097, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
-      propertyPath: m_Name
-      value: "\u4ED3\u5E93"
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 8d413198fb8c1b040859d6358e65ee57, type: 3}
 --- !u!1 &176039764
 GameObject:
   m_ObjectHideFlags: 0
@@ -2806,6 +2735,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   recruitPanel: {fileID: 1288900325}
   employeePanel: {fileID: 1518969985}
+  techTreePanel: {fileID: 2084946223}
 --- !u!114 &187966841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4262,7 +4192,7 @@ MonoBehaviour:
   m_text: "\u53D6\u6D88"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 38b4c7fee69731540bb1514565b4de87, type: 2}
-  m_sharedMaterial: {fileID: 4177776446614360513, guid: b6e2cf8956c8c6b4382c20eb6de2ae8d, type: 2}
+  m_sharedMaterial: {fileID: 4177776446614360513, guid: 38b4c7fee69731540bb1514565b4de87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4325,7 +4255,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &368947387
@@ -4517,7 +4447,7 @@ MonoBehaviour:
   m_text: "\u786E\u8BA4"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 38b4c7fee69731540bb1514565b4de87, type: 2}
-  m_sharedMaterial: {fileID: 4177776446614360513, guid: b6e2cf8956c8c6b4382c20eb6de2ae8d, type: 2}
+  m_sharedMaterial: {fileID: 4177776446614360513, guid: 38b4c7fee69731540bb1514565b4de87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4580,7 +4510,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &371075659
@@ -6108,7 +6038,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -123.4}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &527361516
@@ -8067,7 +7997,7 @@ Transform:
   m_GameObject: {fileID: 733017161}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -12.400001, y: 0.42999995, z: 14.3}
+  m_LocalPosition: {x: 24.93, y: 1.18, z: -53}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9048,7 +8978,7 @@ MonoBehaviour:
   placementEffect: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   effectDuration: 1
   confirmPanel: {fileID: 527361514}
-  followModelPosition: 1
+  followModelPosition: 0
   panelScreenOffset: {x: 0, y: 100}
   rotateStep: 90
 --- !u!114 &833519742
@@ -15732,8 +15662,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.24986115, y: 0.000014206523, z: 0.0000036659353, w: 0.9682817}
-  m_LocalPosition: {x: -12.400001, y: 0.42999995, z: 14.3}
+  m_LocalRotation: {x: -0.24986072, y: -0.00003393267, z: -0.00000875617, w: 0.9682818}
+  m_LocalPosition: {x: 24.93, y: 1.18, z: -53}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17124,7 +17054,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1127169449}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.2498611, y: 0.00000035516356, z: 0.000000091648495, w: 0.9682817}
+  m_LocalRotation: {x: -0.24986129, y: 0, z: 0, w: 0.9682817}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -18226,7 +18156,7 @@ Transform:
   m_GameObject: {fileID: 1285968767}
   serializedVersion: 2
   m_LocalRotation: {x: 0.6463749, y: -0.000000056716427, z: 0.00000004804602, w: 0.76302}
-  m_LocalPosition: {x: -12.4, y: 59.99, z: 5.6000004}
+  m_LocalPosition: {x: 24.93, y: 60.74, z: -61.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -19213,7 +19143,7 @@ MonoBehaviour:
   m_text: "\u65CB\u8F6C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 38b4c7fee69731540bb1514565b4de87, type: 2}
-  m_sharedMaterial: {fileID: 4177776446614360513, guid: b6e2cf8956c8c6b4382c20eb6de2ae8d, type: 2}
+  m_sharedMaterial: {fileID: 4177776446614360513, guid: 38b4c7fee69731540bb1514565b4de87, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -19276,7 +19206,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1366550403
@@ -19513,7 +19443,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1409535057}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.21452342, y: 0.0000003582583, z: 0.00000007868671, w: 0.97671884}
+  m_LocalRotation: {x: -0.2145236, y: 0, z: 0, w: 0.97671884}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -20478,7 +20408,7 @@ MonoBehaviour:
   placementEffect: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   effectDuration: 1
   confirmPanel: {fileID: 527361514}
-  followModelPosition: 1
+  followModelPosition: 0
   panelScreenOffset: {x: 0, y: 100}
   rotateStep: 90
 --- !u!114 &1501756672
@@ -21216,7 +21146,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 154955590}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: TechTreeToggle, Assembly-CSharp
         m_MethodName: ClosePanel
         m_Mode: 1
@@ -21880,7 +21810,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1636964208}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.23225394, y: 0.00000035676774, z: 0.00000008519022, w: 0.9726552}
+  m_LocalRotation: {x: -0.23225412, y: 0, z: 0, w: 0.9726552}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -23091,7 +23021,7 @@ MonoBehaviour:
   placementEffect: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   effectDuration: 1
   confirmPanel: {fileID: 527361514}
-  followModelPosition: 1
+  followModelPosition: 0
   panelScreenOffset: {x: 0, y: 100}
   rotateStep: 90
 --- !u!114 &1789698191
@@ -23982,7 +23912,7 @@ MonoBehaviour:
   placementEffect: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   effectDuration: 1
   confirmPanel: {fileID: 527361514}
-  followModelPosition: 1
+  followModelPosition: 0
   panelScreenOffset: {x: 0, y: 100}
   rotateStep: 90
 --- !u!114 &1881311293
@@ -24722,7 +24652,7 @@ MonoBehaviour:
   placementEffect: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   effectDuration: 1
   confirmPanel: {fileID: 527361514}
-  followModelPosition: 1
+  followModelPosition: 0
   panelScreenOffset: {x: 0, y: 100}
   rotateStep: 90
 --- !u!114 &1992307122
@@ -26326,7 +26256,7 @@ MonoBehaviour:
   placementEffect: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   effectDuration: 1
   confirmPanel: {fileID: 527361514}
-  followModelPosition: 1
+  followModelPosition: 0
   panelScreenOffset: {x: 0, y: 100}
   rotateStep: 90
 --- !u!114 &2131095157
@@ -48249,7 +48179,7 @@ Transform:
   m_GameObject: {fileID: 5946758008507210646}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -12.4, y: -0.01, z: 15.6}
+  m_LocalPosition: {x: 24.93, y: 0.74, z: -51.7}
   m_LocalScale: {x: 26, y: 26, z: 26}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -58079,4 +58009,3 @@ SceneRoots:
   - {fileID: 6470810966802579756}
   - {fileID: 2002090085}
   - {fileID: 1470817824}
-  - {fileID: 172302671}

@@ -11,7 +11,7 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public RectTransform uiPanelRect;
 
     [Header("放置设置")]
-    public LayerMask groundLayer = 1 << 8;
+    public LayerMask groundLayer = 1 << 0;   // 默认改为 Default 层（0）
     public Material validPlacementMaterial;
     public Material invalidPlacementMaterial;
 
@@ -62,6 +62,10 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 rotateButton.onClick.AddListener(OnRotateClicked);
 
             confirmPanel.SetActive(false);
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("DraggableIcon: confirmPanel 未赋值！请拖拽确认面板到 Inspector。");
         }
     }
 
@@ -135,33 +139,37 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     private void ShowConfirmPanel()
     {
-        if (confirmPanel != null)
+        if (confirmPanel == null)
         {
-            confirmPanel.SetActive(true);
-            if (followModelPosition && previewInstance != null)
+            UnityEngine.Debug.LogError("ShowConfirmPanel: confirmPanel 为空！");
+            return;
+        }
+        confirmPanel.SetActive(true);
+        if (followModelPosition && previewInstance != null)
+        {
+            Vector3 screenPos = mainCamera.WorldToScreenPoint(previewInstance.transform.position);
+            RectTransform panelRect = confirmPanel.GetComponent<RectTransform>();
+            if (panelRect != null)
             {
-                Vector3 screenPos = mainCamera.WorldToScreenPoint(previewInstance.transform.position);
-                RectTransform panelRect = confirmPanel.GetComponent<RectTransform>();
-                if (panelRect != null)
-                {
-                    Vector2 pos = new Vector2(screenPos.x + panelScreenOffset.x, screenPos.y + panelScreenOffset.y);
-                    float halfWidth = panelRect.rect.width / 2;
-                    float halfHeight = panelRect.rect.height / 2;
-                    pos.x = Mathf.Clamp(pos.x, halfWidth, Screen.width - halfWidth);
-                    pos.y = Mathf.Clamp(pos.y, halfHeight, Screen.height - halfHeight);
-                    panelRect.position = pos;
-                }
+                Vector2 pos = new Vector2(screenPos.x + panelScreenOffset.x, screenPos.y + panelScreenOffset.y);
+                float halfWidth = panelRect.rect.width / 2;
+                float halfHeight = panelRect.rect.height / 2;
+                pos.x = Mathf.Clamp(pos.x, halfWidth, Screen.width - halfWidth);
+                pos.y = Mathf.Clamp(pos.y, halfHeight, Screen.height - halfHeight);
+                panelRect.position = pos;
             }
         }
+        UnityEngine.Debug.Log("确认面板已显示");
     }
 
     private void OnConfirmClicked()
     {
         if (previewInstance == null || !canPlace || buildingData == null) return;
 
-        // 传递位置和旋转角度
-        if (BuildingManager.Instance.ConstructBuilding(buildingData, previewInstance.transform.position, previewInstance.transform.rotation))
+        // 调用 BuildingManager 尝试建造
+        if (BuildingManager.Instance.ConstructBuilding(buildingData, previewInstance.transform.position))
         {
+            // 建造成功音效特效
             if (placementSound != null)
                 AudioSource.PlayClipAtPoint(placementSound, previewInstance.transform.position);
             if (placementEffect != null)
@@ -172,8 +180,9 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
         else
         {
-            Debug.LogWarning("建造条件不足！");
+            UnityEngine.Debug.LogWarning("建造条件不足！");
         }
+
         EndDragCleanup();
     }
 
@@ -202,19 +211,14 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             previewInstance.transform.position = hit.point;
 
+            bool onGround = ((1 << hit.collider.gameObject.layer) & groundLayer) != 0;
             bool canBuild = BuildingManager.Instance.CanBuild(buildingData);
+            bool overlapping = CheckOverlap();
 
-            if (buildingData.ignoreGroundCheck)
-            {
-                // 忽略地面检查的桥：不检查地面层、不检查重叠，只检查建造条件
-                canPlace = canBuild;
-            }
-            else
-            {
-                bool onGround = ((1 << hit.collider.gameObject.layer) & groundLayer) != 0;
-                bool overlapping = CheckOverlap();
-                canPlace = onGround && canBuild && !overlapping;
-            }
+            canPlace = onGround && canBuild && !overlapping;
+
+            // 调试日志
+            UnityEngine.Debug.Log($"放置检查: onGround={onGround}, canBuild={canBuild}, overlapping={overlapping}, canPlace={canPlace}");
 
             ApplyMaterialToPreview(canPlace ? validPlacementMaterial : invalidPlacementMaterial);
         }

@@ -22,22 +22,34 @@ public class GamePauseManager : MonoBehaviour
     public void RequestPause()
     {
         pauseCount++;
+        UnityEngine.Debug.Log($"RequestPause: pauseCount={pauseCount}");
         if (pauseCount == 1)
         {
             Time.timeScale = 0f;
-            Debug.Log("游戏暂停");
         }
     }
 
     public void RequestResume()
     {
-        pauseCount--;
         if (pauseCount <= 0)
         {
-            pauseCount = 0;
-            Time.timeScale = 1f;
-            Debug.Log("游戏恢复");
+            UnityEngine.Debug.LogWarning("RequestResume called but pauseCount already 0");
+            return;
         }
+        pauseCount--;
+        UnityEngine.Debug.Log($"RequestResume: pauseCount={pauseCount}");
+        if (pauseCount == 0)
+        {
+            Time.timeScale = 1f;
+        }
+    }
+
+    // 强制恢复游戏（用于异常情况）
+    public void ForceResume()
+    {
+        pauseCount = 0;
+        Time.timeScale = 1f;
+        UnityEngine.Debug.Log("ForceResume: 强制恢复游戏");
     }
 
     public bool IsPaused => pauseCount > 0;
