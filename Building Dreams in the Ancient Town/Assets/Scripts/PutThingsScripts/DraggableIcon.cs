@@ -166,23 +166,19 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (previewInstance == null || !canPlace || buildingData == null) return;
 
-        // 调用 BuildingManager 尝试建造
         if (BuildingManager.Instance.ConstructBuilding(buildingData, previewInstance.transform.position))
         {
-            // 建造成功音效特效
-            if (placementSound != null)
-                AudioSource.PlayClipAtPoint(placementSound, previewInstance.transform.position);
-            if (placementEffect != null)
-            {
-                GameObject effect = Instantiate(placementEffect, previewInstance.transform.position, Quaternion.identity);
-                Destroy(effect, effectDuration);
-            }
+            // 移除放置位置的树（半径可调整）
+            TreeRemover.RemoveTreesAtPosition(previewInstance.transform.position, 2f);
+
+            // 音效特效...
+            if (placementSound != null) AudioSource.PlayClipAtPoint(placementSound, previewInstance.transform.position);
+            if (placementEffect != null) Instantiate(placementEffect, previewInstance.transform.position, Quaternion.identity);
         }
         else
         {
-            UnityEngine.Debug.LogWarning("建造条件不足！");
+            Debug.LogWarning("建造条件不足！");
         }
-
         EndDragCleanup();
     }
 
