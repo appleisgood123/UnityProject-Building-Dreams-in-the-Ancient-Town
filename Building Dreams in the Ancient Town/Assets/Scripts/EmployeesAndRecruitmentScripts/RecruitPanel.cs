@@ -52,9 +52,17 @@ public class RecruitPanel : MonoBehaviour
     private void OnClickRecruit()
     {
         if (GameManager.Instance.RecruitCurrentCandidate())
+        {
             RefreshCandidateUI();
+            // 刷新员工面板（如果存在且已激活）
+            EmployeePanel empPanel = FindObjectOfType<EmployeePanel>();
+            if (empPanel != null && empPanel.gameObject.activeInHierarchy)
+                empPanel.RefreshList();
+        }
         else
+        {
             Debug.LogWarning("招募失败：货币不足或没有候选员工");
+        }
     }
 
     private void OnClickRefresh()

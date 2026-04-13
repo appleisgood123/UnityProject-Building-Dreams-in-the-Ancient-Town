@@ -37,4 +37,12 @@ public class BuildingDataSO : ScriptableObject
     [Header("资源上限增加（仅仓库类建筑有效）")]
     public int woodCapIncrease;
     public int stoneCapIncrease;
+
+    [Header("员工需求")]
+    public EmployeeJobType requiredEmployeeType;
+    public int requiredEmployeeCount = 1;
+    public bool requiresEmployeeToWork = true;
+
+    [Header("放置设置")]
+    public bool ignoreGroundCheck = false;   // 桥等特殊建筑可忽略地面限制
 }

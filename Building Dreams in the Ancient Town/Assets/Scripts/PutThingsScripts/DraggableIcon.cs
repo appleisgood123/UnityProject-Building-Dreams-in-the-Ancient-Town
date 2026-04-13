@@ -11,12 +11,12 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public RectTransform uiPanelRect;
 
     [Header("放置设置")]
-    public LayerMask groundLayer = 1 << 0;   // 默认改为 Default 层（0）
+    public LayerMask groundLayer = 1 << 0;
     public Material validPlacementMaterial;
     public Material invalidPlacementMaterial;
 
     [Header("碰撞检测")]
-    public LayerMask blockingLayers = ~0;   // 阻挡层（请排除地面层）
+    public LayerMask blockingLayers = ~0;
 
     [Header("音效")]
     public AudioClip placementSound;
@@ -62,10 +62,6 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 rotateButton.onClick.AddListener(OnRotateClicked);
 
             confirmPanel.SetActive(false);
-        }
-        else
-        {
-            UnityEngine.Debug.LogError("DraggableIcon: confirmPanel 未赋值！请拖拽确认面板到 Inspector。");
         }
     }
 
@@ -139,11 +135,7 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     private void ShowConfirmPanel()
     {
-        if (confirmPanel == null)
-        {
-            UnityEngine.Debug.LogError("ShowConfirmPanel: confirmPanel 为空！");
-            return;
-        }
+        if (confirmPanel == null) return;
         confirmPanel.SetActive(true);
         if (followModelPosition && previewInstance != null)
         {
@@ -159,21 +151,21 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 panelRect.position = pos;
             }
         }
-        UnityEngine.Debug.Log("确认面板已显示");
     }
 
     private void OnConfirmClicked()
     {
         if (previewInstance == null || !canPlace || buildingData == null) return;
 
-        if (BuildingManager.Instance.ConstructBuilding(buildingData, previewInstance.transform.position))
+        if (BuildingManager.Instance.ConstructBuilding(buildingData, previewInstance.transform.position, previewInstance.transform.rotation))
         {
-            // 移除放置位置的树（半径可调整）
-            TreeRemover.RemoveTreesAtPosition(previewInstance.transform.position, 2f);
-
-            // 音效特效...
-            if (placementSound != null) AudioSource.PlayClipAtPoint(placementSound, previewInstance.transform.position);
-            if (placementEffect != null) Instantiate(placementEffect, previewInstance.transform.position, Quaternion.identity);
+            if (placementSound != null)
+                AudioSource.PlayClipAtPoint(placementSound, previewInstance.transform.position);
+            if (placementEffect != null)
+            {
+                GameObject effect = Instantiate(placementEffect, previewInstance.transform.position, Quaternion.identity);
+                Destroy(effect, effectDuration);
+            }
         }
         else
         {
@@ -195,6 +187,7 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
+    // 修改后的方法：支持 ignoreGroundCheck
     private void UpdatePreviewPositionAndCheckPlacement(Vector2 screenPos)
     {
         if (previewInstance == null) return;
@@ -207,14 +200,19 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             previewInstance.transform.position = hit.point;
 
-            bool onGround = ((1 << hit.collider.gameObject.layer) & groundLayer) != 0;
             bool canBuild = BuildingManager.Instance.CanBuild(buildingData);
-            bool overlapping = CheckOverlap();
 
-            canPlace = onGround && canBuild && !overlapping;
-
-            // 调试日志
-            UnityEngine.Debug.Log($"放置检查: onGround={onGround}, canBuild={canBuild}, overlapping={overlapping}, canPlace={canPlace}");
+            if (buildingData.ignoreGroundCheck)
+            {
+                // 桥等特殊建筑：忽略地面和重叠检测
+                canPlace = canBuild;
+            }
+            else
+            {
+                bool onGround = ((1 << hit.collider.gameObject.layer) & groundLayer) != 0;
+                bool overlapping = CheckOverlap();
+                canPlace = onGround && canBuild && !overlapping;
+            }
 
             ApplyMaterialToPreview(canPlace ? validPlacementMaterial : invalidPlacementMaterial);
         }
@@ -265,7 +263,6 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private void ApplyMaterialToPreview(Material mat)
     {
         if (mat == null || previewInstance == null) return;
-
         Renderer[] renderers = previewInstance.GetComponentsInChildren<Renderer>();
         foreach (Renderer renderer in renderers)
         {

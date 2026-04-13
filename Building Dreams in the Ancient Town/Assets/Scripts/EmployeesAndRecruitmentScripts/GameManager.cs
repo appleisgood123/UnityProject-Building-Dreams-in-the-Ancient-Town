@@ -1,20 +1,13 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class GameManager : MonoBehaviour
 {
     private static GameManager _instance;
 
     [Header("数据表引用")]
-    public EmployeeTable employeeTable;   // Inspector 中拖拽
-
-    [SerializeField] private int startCurrency = 1000;
-    private int currentCurrency;
-    public int CurrentCurrency => currentCurrency;
-
-    public UnityAction<int> OnCurrencyChanged;
+    public EmployeeTable employeeTable;
 
     private EmployeeData currentCandidate;
     private List<EmployeeData> employeeList = new List<EmployeeData>();
@@ -35,7 +28,6 @@ public class GameManager : MonoBehaviour
         _instance = this;
         if (transform.parent != null) transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
-        currentCurrency = startCurrency;
     }
 
     private void Start()
@@ -48,21 +40,6 @@ public class GameManager : MonoBehaviour
         if (employeeTable == null)
             Debug.LogError("GameManager: employeeTable 未在 Inspector 中赋值！");
         return employeeTable;
-    }
-
-    public void AddCurrency(int amount)
-    {
-        if (amount < 0) return;
-        currentCurrency += amount;
-        OnCurrencyChanged?.Invoke(currentCurrency);
-    }
-
-    public bool SpendCurrency(int amount)
-    {
-        if (amount < 0 || currentCurrency < amount) return false;
-        currentCurrency -= amount;
-        OnCurrencyChanged?.Invoke(currentCurrency);
-        return true;
     }
 
     public EmployeeData RefreshRecruitCandidate()
@@ -84,36 +61,64 @@ public class GameManager : MonoBehaviour
             id = item.id,
             employeeName = item.employeeName,
             avatarSprite = item.avatarSprite,
-            cost = item.cost
+            cost = item.cost,
+            jobType = item.jobType
         };
         return currentCandidate;
     }
 
-    public EmployeeData GetCurrentCandidate() => currentCandidate;
-
     public bool RecruitCurrentCandidate()
     {
         if (currentCandidate == null) return false;
-        if (!SpendCurrency(currentCandidate.cost)) return false;
 
+        // 检查人口上限
+        int currentPopulation = employeeList.Count;
+        if (currentPopulation >= ResourceManager.Instance.PopulationCap)
+        {
+            Debug.LogWarning($"人口已达上限 ({currentPopulation}/{ResourceManager.Instance.PopulationCap})，无法继续招募");
+            return false;
+        }
+
+        int cost = currentCandidate.cost;
+        if (!ResourceManager.Instance.SpendResources(cost, 0, 0))
+        {
+            Debug.LogWarning($"银两不足，需要 {cost}，当前 {ResourceManager.Instance.Silver}");
+            return false;
+        }
+
+        // 招募逻辑...
         EmployeeData newEmployee = new EmployeeData()
         {
             uid = currentCandidate.uid,
             id = currentCandidate.id,
             employeeName = currentCandidate.employeeName,
             avatarSprite = currentCandidate.avatarSprite,
-            cost = currentCandidate.cost
+            cost = currentCandidate.cost,
+            jobType = currentCandidate.jobType
         };
         employeeList.Add(newEmployee);
         RefreshRecruitCandidate();
+        ResourceManager.Instance.OnResourcesChanged?.Invoke();
         return true;
     }
-
     public List<EmployeeData> GetEmployeeList() => employeeList;
 
     public void FireEmployees(List<string> uidList)
     {
         if (uidList == null || uidList.Count == 0) return;
         employeeList.RemoveAll(x => uidList.Contains(x.uid));
+        ResourceManager.Instance.OnResourcesChanged?.Invoke();
+    }
+
+    public EmployeeData GetEmployeeByUID(string uid)
+    {
+        return employeeList.Find(emp => emp.uid == uid);
+    }
+
+    public EmployeeData GetCurrentCandidate() => currentCandidate;
+
+    public List<EmployeeData> GetIdleEmployeesByJobType(EmployeeJobType jobType)
+    {
+        return employeeList.FindAll(emp => string.IsNullOrEmpty(emp.assignedBuildingUID) && emp.jobType == jobType);
     }
 }
