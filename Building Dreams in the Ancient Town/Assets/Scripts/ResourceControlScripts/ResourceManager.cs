@@ -5,19 +5,19 @@ public class ResourceManager : MonoBehaviour
 {
     public static ResourceManager Instance;
 
-    [Header("³õÊ¼×ÊÔ´")]
+    [Header("ï¿½ï¿½Ê¼ï¿½ï¿½Ô´")]
     public int startSilver = 500;
     public int startWood = 100;
     public int startStone = 0;
     public int startHappiness = 20;
     public int startPopulationCap = 0;
-    public int startTechPoints = 0; // ³õÊ¼¿Æ¼¼µã
+    public int startTechPoints = 0; // ï¿½ï¿½Ê¼ï¿½Æ¼ï¿½ï¿½ï¿½
 
-    [Header("³õÊ¼×ÊÔ´ÉÏÏŞ")]
+    [Header("ï¿½ï¿½Ê¼ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½")]
     public int startWoodCap = 100;
     public int startStoneCap = 0;
 
-    // µ±Ç°×ÊÔ´
+    // ï¿½ï¿½Ç°ï¿½ï¿½Ô´
     public int Silver { get; private set; }
     public int Wood { get; private set; }
     public int Stone { get; private set; }
@@ -25,11 +25,11 @@ public class ResourceManager : MonoBehaviour
     public int PopulationCap { get; private set; }
     public int TechPoints { get; private set; }
 
-    // µ±Ç°×ÊÔ´ÉÏÏŞ
+    // ï¿½ï¿½Ç°ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½
     public int WoodCap { get; private set; }
     public int StoneCap { get; private set; }
 
-    // ÊÕÈë³ËÊı£¨ÓÃÓÚ¿Æ¼¼¼Ó³É£©
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¿Æ¼ï¿½ï¿½Ó³É£ï¿½
     public float silverIncomeMultiplier = 1.0f;
     public float woodIncomeMultiplier = 1.0f;
     public float stoneIncomeMultiplier = 1.0f;
@@ -57,6 +57,34 @@ public class ResourceManager : MonoBehaviour
         TechPoints = startTechPoints;
         WoodCap = startWoodCap;
         StoneCap = startStoneCap;
+
+        // æŒ‚è½½éŸ³æ•ˆç®¡ç†å™¨
+        if (GetComponent<AudioManager>() == null)
+            gameObject.AddComponent<AudioManager>();
+
+        // æŒ‚è½½è®¾ç½®é¢æ¿ï¼ˆESC é”®ï¼‰
+        if (GetComponent<GameSettings>() == null)
+            gameObject.AddComponent<GameSettings>();
+
+        // è®¾ç½®èƒŒæ™¯éŸ³ä¹å¾ªç¯æ’­æ”¾
+        SetupBGM();
+    }
+
+    private void SetupBGM()
+    {
+        AudioClip bgmClip = Resources.Load<AudioClip>("Audio/ã€Šå¤ç­å±±æ°´é—´çš„æ‚ ç„¶é•¿è°ƒã€‹ç¬‘çœ¯çœ¯çš„å·´æ—¦æœ¨");
+        if (bgmClip == null)
+        {
+            Debug.LogWarning("æœªæ‰¾åˆ°èƒŒæ™¯éŸ³ä¹: Resources/Audio/ã€Šå¤ç­å±±æ°´é—´çš„æ‚ ç„¶é•¿è°ƒã€‹ç¬‘çœ¯çœ¯çš„å·´æ—¦æœ¨.mp3");
+            return;
+        }
+
+        AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.clip = bgmClip;
+        audioSource.loop = true;
+        audioSource.volume = PlayerPrefs.GetFloat("BGM_Volume", 0.5f);
+        audioSource.playOnAwake = false;
+        audioSource.Play();
     }
 
     public bool CanAfford(int silver, int wood, int stone, int techPoints = 0)
@@ -109,7 +137,7 @@ public class ResourceManager : MonoBehaviour
         OnResourcesChanged?.Invoke();
     }
 
-    // ÈÎÎñÏµÍ³µ÷ÓÃ´Ë·½·¨Ôö¼Ó¿Æ¼¼µã
+    // ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½ï¿½Ã´Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿Æ¼ï¿½ï¿½ï¿½
     public void AddTechPoints(int amount)
     {
         TechPoints += amount;

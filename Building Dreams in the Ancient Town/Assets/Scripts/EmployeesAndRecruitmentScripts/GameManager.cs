@@ -62,7 +62,8 @@ public class GameManager : MonoBehaviour
             employeeName = item.employeeName,
             avatarSprite = item.avatarSprite,
             cost = item.cost,
-            jobType = item.jobType
+            jobType = item.jobType,
+             npcPrefab = item.npcPrefab
         };
         return currentCandidate;
     }
@@ -94,7 +95,8 @@ public class GameManager : MonoBehaviour
             employeeName = currentCandidate.employeeName,
             avatarSprite = currentCandidate.avatarSprite,
             cost = currentCandidate.cost,
-            jobType = currentCandidate.jobType
+            jobType = currentCandidate.jobType,
+            npcPrefab = currentCandidate.npcPrefab
         };
         employeeList.Add(newEmployee);
         RefreshRecruitCandidate();

@@ -5,7 +5,7 @@ public class MainPanel : MonoBehaviour
 {
     public GameObject recruitPanel;
     public GameObject employeePanel;
-    public GameObject techTreePanel;      // ¿Æ¼¼Ê÷Ãæ°å£¨ÍÏ×§¸³Öµ£©
+    public GameObject techTreePanel;      // ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½å£¨ï¿½ï¿½×§ï¿½ï¿½Öµï¿½ï¿½
 
     private void Awake()
     {
@@ -38,11 +38,11 @@ public class MainPanel : MonoBehaviour
         }
     }
 
-    public void ToggleTechTree()  // ¸ÄÎª public£¬·½±ãÍâ²¿µ÷ÓÃ£¨Èç¿Æ¼¼Ê÷ÄÚ²¿¹Ø±Õ°´Å¥£©
+    public void ToggleTechTree()  // ï¿½ï¿½Îª publicï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â²¿ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½Ø±Õ°ï¿½Å¥ï¿½ï¿½
     {
         if (techTreePanel == null)
         {
-            UnityEngine.Debug.LogError("techTreePanel Î´¸³Öµ£¡");
+            UnityEngine.Debug.LogError("techTreePanel Î´ï¿½ï¿½Öµï¿½ï¿½");
             return;
         }
         if (techTreePanel.activeSelf)
@@ -77,10 +77,10 @@ public class MainPanel : MonoBehaviour
             if (GamePauseManager.Instance != null)
             {
                 GamePauseManager.Instance.RequestResume();
-                // °²È«±£»¤£ºÈç¹û Time.timeScale ÈÔÎª 0£¬Ç¿ÖÆ»Ö¸´
+                // ï¿½ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Time.timeScale ï¿½ï¿½Îª 0ï¿½ï¿½Ç¿ï¿½Æ»Ö¸ï¿½
                 if (Time.timeScale == 0f)
                 {
-                    UnityEngine.Debug.LogWarning("Ç¿ÖÆ»Ö¸´ÓÎÏ·£¨timeScale ÈÔÎª 0£©");
+                    UnityEngine.Debug.LogWarning("Ç¿ï¿½Æ»Ö¸ï¿½ï¿½ï¿½Ï·ï¿½ï¿½timeScale ï¿½ï¿½Îª 0ï¿½ï¿½");
                     GamePauseManager.Instance.ForceResume();
                 }
             }
@@ -97,6 +97,21 @@ public class MainPanel : MonoBehaviour
             MouseManager.Instance.SetCursorVisible(true);
     }
 
-    private void OnClickRecruit() => TogglePanel(recruitPanel);
-    private void OnClickEmployee() => TogglePanel(employeePanel);
+    private void OnClickRecruit()
+    {
+        PlayClick();
+        TogglePanel(recruitPanel);
+    }
+
+    private void OnClickEmployee()
+    {
+        PlayClick();
+        TogglePanel(employeePanel);
+    }
+
+    private void PlayClick()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX("æ™®é€šç‚¹å‡»");
+    }
 }

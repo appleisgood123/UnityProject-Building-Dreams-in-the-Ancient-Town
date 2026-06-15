@@ -1,36 +1,37 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [Header("½¨ÖþÊý¾Ý£¨ÓÉ BuildingPageManager ×Ô¶¯¸³Öµ£©")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ BuildingPageManager ï¿½Ô¶ï¿½ï¿½ï¿½Öµï¿½ï¿½")]
     public BuildingDataSO buildingData;
 
-    [Header("UI Ãæ°å£¨ÓÃÓÚ¼ì²âÊó±êÀë¿ª½¨ÔìÃæ°å£©")]
+    [Header("UI ï¿½ï¿½å£¨ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¿ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½å£©")]
     public RectTransform uiPanelRect;
 
-    [Header("·ÅÖÃÉèÖÃ")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public LayerMask groundLayer = 1 << 0;
     public Material validPlacementMaterial;
     public Material invalidPlacementMaterial;
 
-    [Header("Åö×²¼ì²â")]
+    [Header("ï¿½ï¿½×²ï¿½ï¿½ï¿½")]
     public LayerMask blockingLayers = ~0;
 
-    [Header("ÒôÐ§")]
+    [Header("ï¿½ï¿½Ð§")]
     public AudioClip placementSound;
 
-    [Header("ÌØÐ§")]
+    [Header("ï¿½ï¿½Ð§")]
     public GameObject placementEffect;
     public float effectDuration = 2f;
 
-    [Header("È·ÈÏ/È¡Ïû/Ðý×ªÃæ°å")]
+    [Header("È·ï¿½ï¿½/È¡ï¿½ï¿½/ï¿½ï¿½×ªï¿½ï¿½ï¿½")]
     public GameObject confirmPanel;
     public bool followModelPosition = true;
     public Vector2 panelScreenOffset = new Vector2(0, 100);
 
-    [Header("Ðý×ªÉèÖÃ")]
+    [Header("ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½")]
     public float rotateStep = 90f;
 
     private GameObject previewInstance;
@@ -77,6 +78,11 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É½ï¿½ï¿½ì£¬ï¿½ï¿½Ö¹ï¿½ï¿½×§
+        if (buildingData != null && !CanBuildBuilding())
+        {
+            return;
+        }
         if (previewActive) EndDragCleanup();
         isDragging = true;
         previewActive = false;
@@ -159,8 +165,11 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         if (BuildingManager.Instance.ConstructBuilding(buildingData, previewInstance.transform.position, previewInstance.transform.rotation))
         {
-            if (placementSound != null)
-                AudioSource.PlayClipAtPoint(placementSound, previewInstance.transform.position);
+            // Ê¹ï¿½Ã½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½Ä£ï¿½ÍµÄ°ï¿½Î§ï¿½ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½Ä¾
+            RemoveTreesByBounds(previewInstance);
+
+            // æ’­æ”¾æ”¾ç½®éŸ³æ•ˆ
+            PlaySFX("æ”¾ç½®éŸ³æ•ˆ");
             if (placementEffect != null)
             {
                 GameObject effect = Instantiate(placementEffect, previewInstance.transform.position, Quaternion.identity);
@@ -169,14 +178,22 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
         else
         {
-            Debug.LogWarning("½¨ÔìÌõ¼þ²»×ã£¡");
+            Debug.LogWarning("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã£¡");
         }
+
+        PlaySFX("ç¡®è®¤ç‚¹å‡»");
+        EndDragCleanup();
+    }
+    private void OnCancelClicked()
+    {
+        PlaySFX("å–æ¶ˆç‚¹å‡»");
         EndDragCleanup();
     }
 
-    private void OnCancelClicked()
+    private void PlaySFX(string clipName)
     {
-        EndDragCleanup();
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(clipName);
     }
 
     private void OnRotateClicked()
@@ -187,7 +204,7 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
-    // ÐÞ¸ÄºóµÄ·½·¨£ºÖ§³Ö ignoreGroundCheck
+    // ï¿½Þ¸Äºï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½Ö§ï¿½ï¿½ ignoreGroundCheck
     private void UpdatePreviewPositionAndCheckPlacement(Vector2 screenPos)
     {
         if (previewInstance == null) return;
@@ -204,7 +221,7 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
             if (buildingData.ignoreGroundCheck)
             {
-                // ÇÅµÈÌØÊâ½¨Öþ£ººöÂÔµØÃæºÍÖØµþ¼ì²â
+                // ï¿½Åµï¿½ï¿½ï¿½ï¿½â½¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½
                 canPlace = canBuild;
             }
             else
@@ -270,5 +287,183 @@ public class DraggableIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             for (int i = 0; i < mats.Length; i++) mats[i] = mat;
             renderer.materials = mats;
         }
+    }
+
+    private void RemoveTreesOnTerrain(Vector3 position, float radius)
+    {
+        Terrain[] terrains = Terrain.activeTerrains;
+        if (terrains == null || terrains.Length == 0)
+        {
+            Debug.Log("Ã»ï¿½ï¿½ï¿½Òµï¿½ï¿½ÎºÎµï¿½ï¿½ï¿½");
+            return;
+        }
+
+        bool anyTreeRemoved = false;
+
+        foreach (Terrain terrain in terrains)
+        {
+            TerrainData terrainData = terrain.terrainData;
+            if (terrainData == null) continue;
+
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¾Ö²ï¿½ï¿½ï¿½ï¿½ï¿½
+            Vector3 localPos = terrain.transform.InverseTransformPoint(position);
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Úµï¿½ï¿½Î·ï¿½Î§ï¿½ï¿½
+            if (localPos.x < 0 || localPos.x > terrainData.size.x ||
+                localPos.z < 0 || localPos.z > terrainData.size.z)
+            {
+                Debug.Log($"ï¿½ï¿½ {position} ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½ {terrain.name} ï¿½ï¿½Î§ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½");
+                continue;
+            }
+
+            // ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (0~1)
+            float xNorm = localPos.x / terrainData.size.x;
+            float zNorm = localPos.z / terrainData.size.z;
+
+            // ï¿½ë¾¶ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½Ç¹ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ê£©
+            float radiusNorm = radius / Mathf.Max(terrainData.size.x, terrainData.size.z);
+            Debug.Log($"ï¿½ï¿½ï¿½ï¿½ {terrain.name} ï¿½ë¾¶ï¿½ï¿½Ò»ï¿½ï¿½: {radiusNorm}");
+
+            TreeInstance[] trees = terrainData.treeInstances;
+            if (trees.Length == 0)
+            {
+                Debug.Log($"ï¿½ï¿½ï¿½ï¿½ {terrain.name} ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½");
+                continue;
+            }
+
+            List<TreeInstance> newTrees = new List<TreeInstance>();
+            int removedCount = 0;
+
+            foreach (var tree in trees)
+            {
+                Vector3 treePos = new Vector3(tree.position.x, 0, tree.position.z);
+                Vector3 targetPos = new Vector3(xNorm, 0, zNorm);
+                float distance = Vector3.Distance(treePos, targetPos);
+                if (distance > radiusNorm)
+                {
+                    newTrees.Add(tree);
+                }
+                else
+                {
+                    removedCount++;
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½
+                    Vector3 worldTreePos = terrain.transform.TransformPoint(new Vector3(tree.position.x * terrainData.size.x, 0, tree.position.z * terrainData.size.z));
+                    Debug.Log($"ï¿½Æ³ï¿½ï¿½ï¿½ at {worldTreePos}");
+                }
+            }
+
+            if (removedCount > 0)
+            {
+                terrainData.treeInstances = newTrees.ToArray();
+                terrain.Flush();
+                anyTreeRemoved = true;
+                Debug.Log($"ï¿½ï¿½ï¿½ï¿½ {terrain.name} ï¿½Æ³ï¿½ï¿½ï¿½ {removedCount} ï¿½ï¿½ï¿½ï¿½");
+            }
+        }
+
+        if (!anyTreeRemoved)
+        {
+            Debug.Log($"Î»ï¿½ï¿½ {position} ï¿½ë¾¶ {radius} ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¾");
+        }
+    }
+
+    private bool CanBuildBuilding()
+    {
+        if (buildingData == null) return false;
+        if (!ResourceManager.Instance.CanAfford(buildingData.costSilver, buildingData.costWood, buildingData.costStone))
+            return false;
+        if (ResourceManager.Instance.Happiness < buildingData.requiredHappiness)
+            return false;
+        if (buildingData.requiredBuilding != null && !BuildingManager.Instance.GetConstructedBuildings().Contains(buildingData.requiredBuilding))
+            return false;
+        if (buildingData.requireTechUnlock && TechManager.Instance != null && !TechManager.Instance.IsBuildingUnlocked(buildingData))
+            return false;
+        return true;
+    }
+    private void RemoveTreesByBounds(GameObject buildingPreview)
+    {
+        // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½Ä£ï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î§ï¿½Ð£ï¿½ï¿½Ï²ï¿½ï¿½ï¿½ï¿½ï¿½ Renderer ï¿½ï¿½ Colliderï¿½ï¿½
+        Bounds bounds = GetCombinedBounds(buildingPreview);
+        if (bounds.size == Vector3.zero)
+        {
+            Debug.LogWarning("ï¿½Þ·ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î§ï¿½Ð£ï¿½Ê¹ï¿½ï¿½Ä¬ï¿½Ï°ë¾¶");
+            RemoveTreesOnTerrain(buildingPreview.transform.position, 2f);
+            return;
+        }
+
+        Terrain[] terrains = Terrain.activeTerrains;
+        if (terrains == null || terrains.Length == 0) return;
+
+        bool anyRemoved = false;
+        foreach (Terrain terrain in terrains)
+        {
+            TerrainData terrainData = terrain.terrainData;
+            if (terrainData == null) continue;
+
+            TreeInstance[] trees = terrainData.treeInstances;
+            if (trees.Length == 0) continue;
+
+            List<TreeInstance> newTrees = new List<TreeInstance>();
+            int removedCount = 0;
+
+            foreach (var tree in trees)
+            {
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                Vector3 treeWorldPos = terrain.transform.TransformPoint(new Vector3(
+                    tree.position.x * terrainData.size.x,
+                    0,
+                    tree.position.z * terrainData.size.z
+                ));
+                // ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ú½ï¿½ï¿½ï¿½ï¿½ï¿½Î§ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½Yï¿½ï¿½ï¿½ï¿½ì£¬Ö»ï¿½ï¿½ï¿½ï¿½XZÆ½ï¿½ï¿½Í¶Ó°ï¿½ï¿½
+                if (treeWorldPos.x >= bounds.min.x && treeWorldPos.x <= bounds.max.x &&
+                    treeWorldPos.z >= bounds.min.z && treeWorldPos.z <= bounds.max.z)
+                {
+                    removedCount++;
+                    // ï¿½ï¿½Ñ¡ï¿½ï¿½Ö¾
+                    // Debug.Log($"ï¿½Æ³ï¿½ï¿½ï¿½ at {treeWorldPos}");
+                }
+                else
+                {
+                    newTrees.Add(tree);
+                }
+            }
+
+            if (removedCount > 0)
+            {
+                terrainData.treeInstances = newTrees.ToArray();
+                terrain.Flush();
+                anyRemoved = true;
+                Debug.Log($"ï¿½ï¿½ï¿½ï¿½ {terrain.name} ï¿½Æ³ï¿½ï¿½ï¿½ {removedCount} ï¿½ï¿½ï¿½ï¿½");
+            }
+        }
+
+        if (!anyRemoved)
+        {
+            Debug.Log("Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Æ³ï¿½ï¿½ï¿½ï¿½ï¿½Ä¾");
+        }
+    }
+
+    private Bounds GetCombinedBounds(GameObject obj)
+    {
+        Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
+        Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+        if (renderers.Length == 0)
+        {
+            Collider[] colliders = obj.GetComponentsInChildren<Collider>();
+            if (colliders.Length > 0)
+            {
+                foreach (var col in colliders)
+                    combinedBounds.Encapsulate(col.bounds);
+            }
+            else
+            {
+                combinedBounds.size = Vector3.one; // Ä¬ï¿½Ï´ï¿½Ð¡
+            }
+        }
+        else
+        {
+            foreach (Renderer renderer in renderers)
+                combinedBounds.Encapsulate(renderer.bounds);
+        }
+        return combinedBounds;
     }
 }

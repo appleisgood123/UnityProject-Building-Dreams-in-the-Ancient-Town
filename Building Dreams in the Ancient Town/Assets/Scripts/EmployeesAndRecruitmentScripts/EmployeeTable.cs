@@ -15,4 +15,5 @@ public class EmployeeTableItem
     public Sprite avatarSprite;
     public int cost;
     public EmployeeJobType jobType;   // 新增职业字段
+    public GameObject npcPrefab;
 }

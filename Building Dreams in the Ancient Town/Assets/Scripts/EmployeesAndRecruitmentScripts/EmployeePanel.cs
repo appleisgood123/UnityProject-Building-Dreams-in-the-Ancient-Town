@@ -84,6 +84,7 @@ public class EmployeePanel : MonoBehaviour
 
     private void OnClickFireMode()
     {
+        PlaySFX("普通点击");
         curMode = EmployeePanelMode.Fire;
         selectedUidList.Clear();
         RefreshModeUI();
@@ -92,6 +93,7 @@ public class EmployeePanel : MonoBehaviour
 
     private void OnClickConfirmFire()
     {
+        PlaySFX("确认点击");
         GameManager.Instance.FireEmployees(selectedUidList);
         selectedUidList.Clear();
         curMode = EmployeePanelMode.Normal;
@@ -101,6 +103,7 @@ public class EmployeePanel : MonoBehaviour
 
     private void OnClickCancelFire()
     {
+        PlaySFX("取消点击");
         selectedUidList.Clear();
         curMode = EmployeePanelMode.Normal;
         RefreshModeUI();
@@ -109,10 +112,17 @@ public class EmployeePanel : MonoBehaviour
 
     private void OnClickClose()
     {
+        PlaySFX("关闭点击");
         gameObject.SetActive(false);
         if (GamePauseManager.Instance != null)
             GamePauseManager.Instance.RequestResume();
         if (MouseManager.Instance != null)
             MouseManager.Instance.SetCursorVisible(false);
+    }
+
+    private void PlaySFX(string clipName)
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(clipName);
     }
 }

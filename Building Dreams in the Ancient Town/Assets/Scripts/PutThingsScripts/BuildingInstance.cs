@@ -6,6 +6,8 @@ public class BuildingInstance : MonoBehaviour
     public string uid;
     public BuildingDataSO data;
     public List<string> assignedEmployeeUIDs = new List<string>();
+    public Transform npcSpawnPoint;      // 在建筑预制体中手动放置的空物体作为生成点
+    public GameObject currentNPC;        // 当前生成的NPC实例
 
     private void Awake()
     {

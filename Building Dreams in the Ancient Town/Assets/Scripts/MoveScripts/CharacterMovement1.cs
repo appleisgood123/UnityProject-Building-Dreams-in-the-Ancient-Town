@@ -10,7 +10,7 @@ namespace Cinemachine.Examples
         public KeyCode sprintJoystick = KeyCode.JoystickButton2;
         public KeyCode sprintKeyboard = KeyCode.Space;
 
-        [Header("Ì¨½×ÅÀÉıÉèÖÃ")]
+        [Header("Ì¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
         public float stepCheckDistance = 1.0f;
         public float stepRayHeight = 0.5f;
         public float maxStepHeight = 0.5f;
@@ -26,6 +26,13 @@ namespace Cinemachine.Examples
         private Camera mainCamera;
         private float velocity;
 
+        // ç§»åŠ¨éŸ³æ•ˆ
+        private AudioSource moveAudioSource;
+        private AudioClip jogClip;
+        private AudioClip runClip;
+        private bool wasMoving = false;
+        private bool wasSprinting = false;
+
         void Start()
         {
             anim = GetComponent<Animator>();
@@ -40,6 +47,15 @@ namespace Cinemachine.Examples
             rb = GetComponent<Rigidbody>();
             rb.interpolation = RigidbodyInterpolation.Interpolate;
             rb.constraints &= ~RigidbodyConstraints.FreezeRotationY;
+
+            // è®¾ç½®ç§»åŠ¨éŸ³æ•ˆ
+            moveAudioSource = gameObject.AddComponent<AudioSource>();
+            moveAudioSource.loop = true;
+            moveAudioSource.playOnAwake = false;
+            moveAudioSource.volume = 0.4f;
+            moveAudioSource.spatialBlend = 1f; // 3D éŸ³æ•ˆ
+            jogClip = Resources.Load<AudioClip>("Audio/æ…¢è·‘");
+            runClip = Resources.Load<AudioClip>("Audio/è·‘æ­¥");
         }
 
         void Update()
@@ -76,7 +92,10 @@ namespace Cinemachine.Examples
             anim.SetFloat("Direction", direction);
             anim.SetBool("isSprinting", isSprinting);
 
-            // Ô­Ê¼Ğı×ª/ÒÆ¶¯Âß¼­
+            // ç§»åŠ¨éŸ³æ•ˆåˆ‡æ¢
+            UpdateMovementSound();
+
+            // Ô­Ê¼ï¿½ï¿½×ª/ï¿½Æ¶ï¿½ï¿½ß¼ï¿½
             var tr = useCharacterForward ? transform : mainCamera.transform;
             var right = tr.right;
             var forward = tr.forward;
@@ -93,11 +112,36 @@ namespace Cinemachine.Examples
                 rb.angularVelocity = Vector3.up * angle;
             }
 
-            // Ì¨½×ÅÀÉı¼ì²â£¨½öÏòÇ°ÒÆ¶¯Ê±£©
+            // Ì¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â£¨ï¿½ï¿½ï¿½ï¿½Ç°ï¿½Æ¶ï¿½Ê±ï¿½ï¿½
             if (speed > 0.1f && input.y > 0.1f)
             {
                 TryStepUp();
             }
+        }
+
+        private void UpdateMovementSound()
+        {
+            bool isMoving = speed > 0.1f;
+            if (isMoving && !wasMoving)
+            {
+                // å¼€å§‹ç§»åŠ¨
+                moveAudioSource.clip = isSprinting ? runClip : jogClip;
+                moveAudioSource.Play();
+            }
+            else if (isMoving && wasSprinting != isSprinting)
+            {
+                // åˆ‡æ¢æ­¥æ€
+                moveAudioSource.clip = isSprinting ? runClip : jogClip;
+                moveAudioSource.Play();
+            }
+            else if (!isMoving && wasMoving)
+            {
+                // åœæ­¢
+                moveAudioSource.Stop();
+            }
+
+            wasMoving = isMoving;
+            wasSprinting = isSprinting;
         }
 
         private void TryStepUp()

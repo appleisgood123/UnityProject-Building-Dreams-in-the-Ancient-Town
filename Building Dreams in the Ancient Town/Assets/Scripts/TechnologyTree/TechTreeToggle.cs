@@ -2,21 +2,13 @@ using UnityEngine;
 
 public class TechTreeToggle : MonoBehaviour
 {
-    public GameObject techTreePanel;            // ¿Æ¼¼Ê÷Ãæ°å¶ÔÏó
+    public GameObject techTreePanel;            // ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     private TechDetailPanel techDetailPanel;
 
     private void Start()
     {
         if (techTreePanel != null)
             techDetailPanel = techTreePanel.GetComponentInChildren<TechDetailPanel>(true);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            ToggleTechTree();
-        }
     }
 
     public void ToggleTechTree()
@@ -48,7 +40,7 @@ public class TechTreeToggle : MonoBehaviour
             if (MouseManager.Instance != null)
                 MouseManager.Instance.SetCursorVisible(false);
 
-            // ¹Ø±Õ¿Æ¼¼Ê÷Ê±Í¬Ê±Òþ²ØÏêÇéÃæ°å
+            // ï¿½Ø±Õ¿Æ¼ï¿½ï¿½ï¿½Ê±Í¬Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             if (techDetailPanel != null)
                 techDetailPanel.Hide();
         }

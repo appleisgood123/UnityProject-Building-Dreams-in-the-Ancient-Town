@@ -46,9 +46,14 @@ public class TechManager : MonoBehaviour
 
         unlockedTechs.Add(tech);
         ApplyTechEffect(tech);
+
+        // æ’­æ”¾å‡çº§éŸ³æ•ˆ
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX("å‡çº§éŸ³æ•ˆ");
+
         OnTechUnlocked?.Invoke(tech);
 
-        // ´¥·¢ÈÎÎñ¼ì²é
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (TaskManager.Instance != null)
             TaskManager.Instance.CheckTaskProgress();
 
@@ -80,7 +85,7 @@ public class TechManager : MonoBehaviour
 
     public List<TechNodeData> GetAllTechNodes() => allTechNodes;
 
-    // »ñÈ¡ËùÓĞÒÑ½âËøµÄ½¨Öş£¨ÓÉ¿Æ¼¼½âËøµÄ£©
+    // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ñ½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¿Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½
     public List<BuildingDataSO> GetUnlockedBuildings()
     {
         List<BuildingDataSO> result = new List<BuildingDataSO>();
@@ -90,7 +95,7 @@ public class TechManager : MonoBehaviour
         return result;
     }
 
-    // ¼ì²éÄ³¸ö½¨ÖşÊÇ·ñÒÑ±»¿Æ¼¼½âËø
+    // ï¿½ï¿½ï¿½Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ±ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½
     public bool IsBuildingUnlocked(BuildingDataSO building)
     {
         foreach (var tech in unlockedTechs)
@@ -101,7 +106,7 @@ public class TechManager : MonoBehaviour
         return false;
     }
 
-    // ¸ù¾İÃû³Æ¼ì²é¿Æ¼¼ÊÇ·ñÒÑ½âËø£¨ÓÃÓÚÈÎÎñÏµÍ³£©
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Æ¼ï¿½ï¿½Ç·ï¿½ï¿½Ñ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½
     public bool IsTechUnlocked(string techName)
     {
         foreach (var tech in unlockedTechs)

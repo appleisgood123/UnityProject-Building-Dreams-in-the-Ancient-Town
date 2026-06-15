@@ -6,15 +6,14 @@ public class CameraSwitch : MonoBehaviour
     public CinemachineFreeLook playerCam;
     public CinemachineVirtualCamera godCam;
     public MonoBehaviour playerMovement;
-    public GameObject buildPanel;          // 底部建造面板
+    public GameObject buildPanel;
     public KeyCode switchKey = KeyCode.Q;
-    public MouseManager mouseManager;      // 可手动拖拽，若未拖拽则自动查找
+    public MouseManager mouseManager;
 
     [HideInInspector] public bool isGodView = false;
 
     void Start()
     {
-        // 自动查找 MouseManager（如果未拖拽）
         if (mouseManager == null)
             mouseManager = FindObjectOfType<MouseManager>();
 
@@ -23,42 +22,36 @@ public class CameraSwitch : MonoBehaviour
         if (playerMovement != null)
             playerMovement.enabled = true;
         if (buildPanel != null)
-            buildPanel.SetActive(false);   // 初始隐藏建造面板
+            buildPanel.SetActive(false);
     }
 
     void Update()
     {
         if (Input.GetKeyDown(switchKey))
         {
-            isGodView = !isGodView;
-            if (isGodView)
-            {
-                // 切换到神视角
-                playerCam.Priority = 0;
-                godCam.Priority = 10;
-                if (playerMovement != null)
-                    playerMovement.enabled = false;
-                if (buildPanel != null)
-                    buildPanel.SetActive(true);
+            SetGodView(!isGodView);
+        }
+    }
 
-                // 显示鼠标
-                if (mouseManager != null)
-                    mouseManager.SetCursorVisible(true);
-            }
-            else
-            {
-                // 切换到玩家视角
-                playerCam.Priority = 10;
-                godCam.Priority = 0;
-                if (playerMovement != null)
-                    playerMovement.enabled = true;
-                if (buildPanel != null)
-                    buildPanel.SetActive(false);
-
-                // 隐藏鼠标
-                if (mouseManager != null)
-                    mouseManager.SetCursorVisible(false);
-            }
+    // 公共方法，用于外部切换上帝视角
+    public void SetGodView(bool enable)
+    {
+        isGodView = enable;
+        if (enable)
+        {
+            playerCam.Priority = 0;
+            godCam.Priority = 10;
+            if (playerMovement != null) playerMovement.enabled = false;
+            if (buildPanel != null) buildPanel.SetActive(true);
+            if (mouseManager != null) mouseManager.SetCursorVisible(true);
+        }
+        else
+        {
+            playerCam.Priority = 10;
+            godCam.Priority = 0;
+            if (playerMovement != null) playerMovement.enabled = true;
+            if (buildPanel != null) buildPanel.SetActive(false);
+            if (mouseManager != null) mouseManager.SetCursorVisible(false);
         }
     }
 }

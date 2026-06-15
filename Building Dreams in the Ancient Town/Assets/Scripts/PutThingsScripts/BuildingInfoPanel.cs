@@ -1,4 +1,4 @@
-using TMPro;
+ï»¿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
@@ -7,10 +7,10 @@ public class BuildingInfoPanel : MonoBehaviour
 {
     public static BuildingInfoPanel Instance;
 
-    [Header("Ãæ°åÄÚÈİ¸ùÎïÌå")]
+    [Header("é¢æ¿å†…å®¹æ ¹ç‰©ä½“")]
     public GameObject panel;
 
-    [Header("UI×é¼ş")]
+    [Header("UIç»„ä»¶")]
     public TextMeshProUGUI nameText;
     public Image displayImage;
     public TextMeshProUGUI descriptionText;
@@ -18,10 +18,14 @@ public class BuildingInfoPanel : MonoBehaviour
     public TextMeshProUGUI immediateText;
     public Button closeButton;
 
-    [Header("Ô±¹¤¹ÜÀí")]
+    [Header("å‘˜å·¥ç®¡ç†")]
     public TextMeshProUGUI employeeStatusText;
     public GameObject employeeSelectionPanel;
+    public Button closeSelectionButton;
     public TMP_FontAsset employeeButtonFont;
+
+    [Header("æ‹†é™¤")]
+    public Button demolishButton;      // æ–°å¢æ‹†é™¤æŒ‰é’®ï¼ˆåœ¨ Inspector ä¸­æ‹–æ‹½ï¼‰
 
     private BuildingInstance currentBuilding;
     public System.Action OnPanelClosed;
@@ -34,17 +38,15 @@ public class BuildingInfoPanel : MonoBehaviour
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
-        // ×Ô¶¯²éÕÒÃæ°å
         if (panel == null)
             panel = transform.Find("PanelContent")?.gameObject;
 
         if (panel != null) panel.SetActive(false);
-        else Debug.LogError("Î´ÕÒµ½ PanelContent");
+        else Debug.LogError("æœªæ‰¾åˆ° PanelContent");
 
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
 
-        // ÎªÔ±¹¤×´Ì¬ÎÄ±¾Ìí¼Óµã»÷ÊÂ¼ş
         if (employeeStatusText != null)
         {
             Button statusBtn = employeeStatusText.GetComponent<Button>();
@@ -53,63 +55,66 @@ public class BuildingInfoPanel : MonoBehaviour
             statusBtn.onClick.AddListener(OnEmployeeStatusClicked);
         }
 
+        if (closeSelectionButton != null)
+            closeSelectionButton.onClick.AddListener(CloseEmployeeSelection);
+
+        // æ–°å¢æ‹†é™¤æŒ‰é’®ç›‘å¬
+        if (demolishButton != null)
+            demolishButton.onClick.AddListener(DemolishBuilding);
+
         if (employeeSelectionPanel != null)
             employeeSelectionPanel.SetActive(false);
+        if (closeSelectionButton != null)
+            closeSelectionButton.gameObject.SetActive(false);
+    }
+
+    private void CloseEmployeeSelection()
+    {
+        if (employeeSelectionPanel != null)
+            employeeSelectionPanel.SetActive(false);
+        if (closeSelectionButton != null)
+            closeSelectionButton.gameObject.SetActive(false);
     }
 
     public void Close()
     {
         if (!IsVisible) return;
-
+        PlaySFX("å…³é—­ç‚¹å‡»");
         panel.SetActive(false);
         OnPanelClosed?.Invoke();
+        CloseEmployeeSelection();
 
-        if (MouseManager.Instance != null)
-            MouseManager.Instance.SetCursorVisible(false);
-
-        if (GamePauseManager.Instance != null)
-            GamePauseManager.Instance.RequestResume();
+        if (MouseManager.Instance != null) MouseManager.Instance.SetCursorVisible(false);
+        if (GamePauseManager.Instance != null) GamePauseManager.Instance.RequestResume();
     }
 
     public void Show(BuildingDataSO data, BuildingInstance buildingInstance)
     {
         if (data == null || buildingInstance == null) return;
-
-        // Ç¿ÖÆÏÈ¹Ø±Õ£¬±ÜÃâÖØ¸´´ò¿ª
         Close();
-
         currentBuilding = buildingInstance;
 
-        if (MouseManager.Instance != null)
-            MouseManager.Instance.SetCursorVisible(true);
+        if (MouseManager.Instance != null) MouseManager.Instance.SetCursorVisible(true);
+        if (GamePauseManager.Instance != null) GamePauseManager.Instance.RequestPause();
 
-        if (GamePauseManager.Instance != null)
-            GamePauseManager.Instance.RequestPause();
-
-        // Ìî³äUI
         nameText.text = data.buildingName;
-
         if (displayImage != null)
         {
             displayImage.gameObject.SetActive(data.displayImage != null);
             if (data.displayImage != null) displayImage.sprite = data.displayImage;
         }
+        if (descriptionText != null) descriptionText.text = data.description;
 
-        if (descriptionText != null)
-            descriptionText.text = data.description;
+        string monthly = "æ— ";
+        if (data.monthlySilver > 0) monthly += $"é“¶ä¸¤+{data.monthlySilver} ";
+        if (data.monthlyWood > 0) monthly += $"æœ¨æ+{data.monthlyWood} ";
+        if (data.monthlyStone > 0) monthly += $"ç –çŸ³+{data.monthlyStone} ";
+        if (incomeText != null) incomeText.text = $"æ¯æœˆæ”¶ç›Šï¼š{monthly.Trim()}";
 
-        // Ã¿ÔÂÊÕÒæ
-        string monthly = "ÎŞ";
-        if (data.monthlySilver > 0) monthly += $"ÒøÁ½+{data.monthlySilver} ";
-        if (data.monthlyWood > 0) monthly += $"Ä¾²Ä+{data.monthlyWood} ";
-        if (data.monthlyStone > 0) monthly += $"×©Ê¯+{data.monthlyStone} ";
-        if (incomeText != null) incomeText.text = $"Ã¿ÔÂÊÕÒæ£º{monthly.Trim()}";
-
-        // Á¢¼´ÊÕÒæ
-        string immediate = "ÎŞ";
-        if (data.incomeHappiness > 0) immediate += $"ĞÒ¸£¶È+{data.incomeHappiness} ";
-        if (data.populationCapIncrease > 0) immediate += $"ÈË¿ÚÉÏÏŞ+{data.populationCapIncrease} ";
-        if (immediateText != null) immediateText.text = $"Á¢¼´ÊÕÒæ£º{immediate.Trim()}";
+        string immediate = "æ— ";
+        if (data.incomeHappiness > 0) immediate += $"å¹¸ç¦åº¦+{data.incomeHappiness} ";
+        if (data.populationCapIncrease > 0) immediate += $"äººå£ä¸Šé™+{data.populationCapIncrease} ";
+        if (immediateText != null) immediateText.text = $"ç«‹å³æ”¶ç›Šï¼š{immediate.Trim()}";
 
         RefreshEmployeeStatus();
         panel.SetActive(true);
@@ -118,23 +123,20 @@ public class BuildingInfoPanel : MonoBehaviour
     private void RefreshEmployeeStatus()
     {
         if (employeeStatusText == null || currentBuilding == null) return;
-
         if (currentBuilding.assignedEmployeeUIDs.Count == 0)
+            employeeStatusText.text = "å‘˜å·¥ï¼šæ— ";
+        else
         {
-            employeeStatusText.text = "Ô±¹¤£ºÎŞ";
-            return;
+            string uid = currentBuilding.assignedEmployeeUIDs[0];
+            EmployeeData emp = GameManager.Instance.GetEmployeeByUID(uid);
+            employeeStatusText.text = emp != null ? $"å‘˜å·¥ï¼š{emp.employeeName}" : "å‘˜å·¥ï¼šæœªçŸ¥";
         }
-
-        string uid = currentBuilding.assignedEmployeeUIDs[0];
-        EmployeeData emp = GameManager.Instance.GetEmployeeByUID(uid);
-        employeeStatusText.text = emp != null ? $"Ô±¹¤£º{emp.employeeName}" : "Ô±¹¤£ºÎ´Öª";
     }
 
     private void OnEmployeeStatusClicked()
     {
         if (currentBuilding == null || employeeSelectionPanel == null) return;
 
-        // Çå¿Õ¾É°´Å¥
         foreach (Transform child in employeeSelectionPanel.transform)
             Destroy(child.gameObject);
 
@@ -143,31 +145,70 @@ public class BuildingInfoPanel : MonoBehaviour
 
         foreach (var emp in idleList)
         {
-            GameObject btn = new GameObject("EmpBtn", typeof(Button));
-            btn.transform.SetParent(employeeSelectionPanel.transform);
+            // åˆ›å»ºæŒ‰é’®å®¹å™¨
+            GameObject btnObj = new GameObject("EmpBtn", typeof(RectTransform), typeof(Button), typeof(Image));
+            btnObj.transform.SetParent(employeeSelectionPanel.transform);
+            btnObj.transform.localScale = Vector3.one;
 
-            TextMeshProUGUI tmp = btn.AddComponent<TextMeshProUGUI>();
-            tmp.text = emp.employeeName;
-            tmp.fontSize = 24;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = Color.white;
-            if (employeeButtonFont != null) tmp.font = employeeButtonFont;
+            RectTransform btnRect = btnObj.GetComponent<RectTransform>();
+            btnRect.sizeDelta = new Vector2(100, 120);
 
-            btn.GetComponent<Button>().onClick.AddListener(() => SelectEmployee(emp.uid));
+            // è®¾ç½®å¤´åƒå›¾ç‰‡
+            Image btnImage = btnObj.GetComponent<Image>();
+            if (emp.avatarSprite != null)
+                btnImage.sprite = emp.avatarSprite;
+            else
+                btnImage.color = new Color(0.8f, 0.8f, 0.8f, 1f);
+
+            // å¤´åƒä¸‹æ–¹æ˜¾ç¤ºåå­—
+            GameObject nameObj = new GameObject("Name", typeof(RectTransform), typeof(TextMeshProUGUI));
+            nameObj.transform.SetParent(btnObj.transform, false);
+            nameObj.transform.localScale = Vector3.one;
+
+            RectTransform nameRect = nameObj.GetComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0, 0);
+            nameRect.anchorMax = new Vector2(1, 0);
+            nameRect.pivot = new Vector2(0.5f, 1f);
+            nameRect.sizeDelta = new Vector2(0, 28);
+            nameRect.anchoredPosition = new Vector2(0, -6);
+
+            TextMeshProUGUI nameText = nameObj.GetComponent<TextMeshProUGUI>();
+            nameText.text = emp.employeeName;
+            nameText.fontSize = 16;
+            nameText.alignment = TextAlignmentOptions.Center;
+            nameText.color = Color.black;
+            if (employeeButtonFont != null) nameText.font = employeeButtonFont;
+
+            btnObj.GetComponent<Button>().onClick.AddListener(() => SelectEmployee(emp.uid));
         }
 
         employeeSelectionPanel.SetActive(true);
+        if (closeSelectionButton != null)
+            closeSelectionButton.gameObject.SetActive(true);
     }
 
     private void SelectEmployee(string uid)
     {
         if (currentBuilding == null) return;
-
+        PlaySFX("ç¡®è®¤ç‚¹å‡»");
         foreach (string id in currentBuilding.assignedEmployeeUIDs.ToArray())
             BuildingManager.Instance.RemoveEmployeeFromBuilding(id, currentBuilding);
-
         BuildingManager.Instance.AssignEmployeeToBuilding(uid, currentBuilding);
         RefreshEmployeeStatus();
-        employeeSelectionPanel.SetActive(false);
+        CloseEmployeeSelection();
+    }
+
+    // æ–°å¢æ‹†é™¤æ–¹æ³•
+    private void DemolishBuilding()
+    {
+        if (currentBuilding == null) return;
+        BuildingManager.Instance.DemolishBuilding(currentBuilding);
+        Close(); // æ‹†é™¤åå…³é—­é¢æ¿
+    }
+
+    private void PlaySFX(string clipName)
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySFX(clipName);
     }
 }

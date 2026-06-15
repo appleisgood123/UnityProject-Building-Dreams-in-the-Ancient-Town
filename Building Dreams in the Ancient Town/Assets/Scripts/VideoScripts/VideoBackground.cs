@@ -4,28 +4,40 @@ using UnityEngine.Video;
 [RequireComponent(typeof(VideoPlayer))]
 public class VideoBackground : MonoBehaviour
 {
-    [Header("ÊÓÆµ²¥·ÅÆ÷")]
+    [Header("è§†é¢‘ç»„ä»¶")]
     public VideoPlayer videoPlayer;
 
-    [Header("ÏÔÊ¾ÊÓÆµµÄUI")]
+    [Header("æ˜¾ç¤ºè§†é¢‘çš„UI")]
     public UnityEngine.UI.RawImage rawImage;
+
+    private RenderTexture rt;
 
     void Start()
     {
-        // ×Ô¶¯»ñÈ¡×é¼ş
+        // è‡ªåŠ¨è·å–ç»„ä»¶
         if (videoPlayer == null)
             videoPlayer = GetComponent<VideoPlayer>();
 
-        // ¹Ø¼ü£º°ÑÊÓÆµäÖÈ¾µ½ UI ÉÏ
+        // å…³é”®ï¼šè®¾ç½®è§†é¢‘æ¸²æŸ“åˆ° UI
         videoPlayer.renderMode = VideoRenderMode.RenderTexture;
 
-        // ´´½¨ÁÙÊ±ÎÆÀí£¨²»ÓÃÊÖ¶¯ĞÂ½¨ RenderTexture£©
-        RenderTexture rt = new RenderTexture(1920, 1080, 0);
+        // åˆ›å»ºè¿è¡Œæ—¶ RenderTexture
+        rt = new RenderTexture(1920, 1080, 0);
         videoPlayer.targetTexture = rt;
         rawImage.texture = rt;
 
-        // ×Ô¶¯Ñ­»·²¥·Å
+        // è‡ªåŠ¨å¾ªç¯æ’­æ”¾
         videoPlayer.isLooping = true;
         videoPlayer.Play();
+    }
+
+    void OnDestroy()
+    {
+        if (rt != null)
+        {
+            rt.Release();
+            Destroy(rt);
+            rt = null;
+        }
     }
 }

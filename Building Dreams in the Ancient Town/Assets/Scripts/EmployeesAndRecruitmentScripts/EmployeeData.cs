@@ -11,6 +11,7 @@ public class EmployeeData
     public int cost;
     public EmployeeJobType jobType;               // 职业
     public string assignedBuildingUID = "";       // 分配的建筑实例UID
+    public GameObject npcPrefab;                  // 该员工对应的NPC预制体
 }
 
 public enum EmployeeJobType
