@@ -83,6 +83,16 @@ public class TechManager : MonoBehaviour
         }
     }
 
+    public void LoadUnlockedTechs(List<string> techNames)
+    {
+        unlockedTechs.Clear();
+        foreach (var tech in allTechNodes)
+        {
+            if (techNames.Contains(tech.nodeName))
+                unlockedTechs.Add(tech);
+        }
+    }
+
     public List<TechNodeData> GetAllTechNodes() => allTechNodes;
 
     // ��ȡ�����ѽ����Ľ������ɿƼ������ģ�

@@ -52,6 +52,35 @@ public class TaskManager : MonoBehaviour
     }
 
     // 检查所有活跃任务（可由外部事件触发）
+    public void LoadFromSaveData(List<string> activeNames, List<string> completedNames)
+    {
+        activeTasks.Clear();
+        completedTasks.Clear();
+        TaskDataSO[] allTasks = Resources.LoadAll<TaskDataSO>("");
+        foreach (var name in activeNames)
+        {
+            foreach (var t in allTasks)
+            {
+                if (t.taskName == name)
+                {
+                    activeTasks.Add(t);
+                    break;
+                }
+            }
+        }
+        foreach (var name in completedNames)
+        {
+            foreach (var t in allTasks)
+            {
+                if (t.taskName == name)
+                {
+                    completedTasks.Add(t);
+                    break;
+                }
+            }
+        }
+    }
+
     public void CheckTaskProgress()
     {
         for (int i = activeTasks.Count - 1; i >= 0; i--)

@@ -154,6 +154,32 @@ public class BuildingManager : MonoBehaviour
     }
 
     // ---------- ������� ----------
+    public void ClearAllBuildings()
+    {
+        foreach (var inst in allBuildingInstances.ToArray())
+        {
+            if (inst.currentNPC != null)
+                Destroy(inst.currentNPC);
+            Destroy(inst.gameObject);
+        }
+        allBuildingInstances.Clear();
+        constructedBuildings.Clear();
+    }
+
+    public BuildingInstance RestoreBuilding(BuildingDataSO buildingData, Vector3 position, Quaternion rotation, List<string> employeeUIDs)
+    {
+        if (buildingData == null || buildingData.finalPrefab == null) return null;
+        GameObject newBuilding = Object.Instantiate(buildingData.finalPrefab, position, rotation);
+        BuildingInstance instance = newBuilding.GetComponent<BuildingInstance>();
+        if (instance == null) instance = newBuilding.AddComponent<BuildingInstance>();
+        instance.data = buildingData;
+        if (employeeUIDs != null)
+            instance.assignedEmployeeUIDs = new List<string>(employeeUIDs);
+        allBuildingInstances.Add(instance);
+        constructedBuildings.Add(buildingData);
+        return instance;
+    }
+
     public void DemolishBuilding(BuildingInstance buildingInstance)
     {
         if (buildingInstance == null) return;
@@ -193,6 +219,8 @@ public class BuildingManager : MonoBehaviour
         // 6. ���ٽ�������
         Destroy(buildingInstance.gameObject);
     }
+
+    public List<BuildingInstance> AllBuildingInstances => allBuildingInstances;
 
     public List<BuildingDataSO> GetConstructedBuildings() => constructedBuildings;
     public int GetBuiltCount(string buildingName) => constructedBuildings.Count(b => b.buildingName == buildingName);

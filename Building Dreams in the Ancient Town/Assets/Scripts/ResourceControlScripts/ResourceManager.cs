@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -70,6 +71,17 @@ public class ResourceManager : MonoBehaviour
         SetupBGM();
     }
 
+    private IEnumerator Start()
+    {
+        // 如果有待加载的存档数据，等一帧让其他Manager初始化后恢复
+        if (SaveLoadManager.PendingLoadData != null)
+        {
+            yield return null;
+            SaveLoadManager.ApplySaveData(SaveLoadManager.PendingLoadData);
+            SaveLoadManager.PendingLoadData = null;
+        }
+    }
+
     private void SetupBGM()
     {
         AudioClip bgmClip = Resources.Load<AudioClip>("Audio/《古筝山水间的悠然长调》笑眯眯的巴旦木");
@@ -138,6 +150,22 @@ public class ResourceManager : MonoBehaviour
     }
 
     // ����ϵͳ���ô˷������ӿƼ���
+    public void LoadFromSaveData(SaveData data)
+    {
+        Silver = data.silver;
+        Wood = data.wood;
+        Stone = data.stone;
+        Happiness = data.happiness;
+        PopulationCap = data.populationCap;
+        TechPoints = data.techPoints;
+        WoodCap = data.woodCap;
+        StoneCap = data.stoneCap;
+        silverIncomeMultiplier = data.silverIncomeMultiplier;
+        woodIncomeMultiplier = data.woodIncomeMultiplier;
+        stoneIncomeMultiplier = data.stoneIncomeMultiplier;
+        OnResourcesChanged?.Invoke();
+    }
+
     public void AddTechPoints(int amount)
     {
         TechPoints += amount;

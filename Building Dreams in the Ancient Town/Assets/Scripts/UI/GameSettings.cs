@@ -2,16 +2,20 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-/// <summary>主场景设置：ESC 键打开/关闭设置面板，控制 BGM/SFX 音量</summary>
+/// <summary>主场景设置：ESC 键打开/关闭设置面板，控制 BGM/SFX 音量，存档和退出</summary>
 public class GameSettings : MonoBehaviour
 {
     private GameObject settingsOverlay;
+    private GameObject saveOverlay;
     private bool isSetup = false;
 
     private const string BGM_VOLUME_KEY = "BGM_Volume";
     private const string SFX_VOLUME_KEY = "SFX_Volume";
+    private const string SAVE_COUNT_KEY = "SaveCount_Slot";
 
     private AudioSource bgmAudioSource;
+    private int[] saveCounters = new int[SaveLoadManager.MAX_SLOTS];
+    private int expandedSlot = -1;
 
     void Start()
     {
@@ -23,12 +27,19 @@ public class GameSettings : MonoBehaviour
                 if (src.loop) { bgmAudioSource = src; break; }
             }
         }
+        for (int i = 0; i < SaveLoadManager.MAX_SLOTS; i++)
+            saveCounters[i] = PlayerPrefs.GetInt(SAVE_COUNT_KEY + i, 1);
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
-            ToggleSettings();
+        {
+            if (saveOverlay != null && saveOverlay.activeSelf)
+                HideSaveOverlay();
+            else
+                ToggleSettings();
+        }
     }
 
     public void ToggleSettings()
@@ -111,6 +122,30 @@ public class GameSettings : MonoBehaviour
             }
         }
 
+        // 绑定"保存游戏"按钮 → 打开独立存档面板
+        Transform saveBtnT = panelT.Find("SaveGameButton");
+        if (saveBtnT != null)
+        {
+            Button saveBtn = saveBtnT.GetComponent<Button>();
+            if (saveBtn != null)
+            {
+                saveBtn.onClick.RemoveAllListeners();
+                saveBtn.onClick.AddListener(ShowSaveOverlay);
+            }
+        }
+
+        // 绑定"返回主菜单"按钮
+        Transform exitBtnT = panelT.Find("ExitGameButton");
+        if (exitBtnT != null)
+        {
+            Button exitBtn = exitBtnT.GetComponent<Button>();
+            if (exitBtn != null)
+            {
+                exitBtn.onClick.RemoveAllListeners();
+                exitBtn.onClick.AddListener(OnExitToMenu);
+            }
+        }
+
         settingsOverlay.SetActive(false);
         isSetup = true;
     }
@@ -165,13 +200,19 @@ public class GameSettings : MonoBehaviour
         RectTransform cr = cb.GetComponent<RectTransform>();
         cr.anchorMin = cr.anchorMax = new Vector2(0.5f, 0.5f);
         cr.sizeDelta = new Vector2(150, 50);
-        cr.anchoredPosition = new Vector2(0, -176);
-        cr.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        cr.anchoredPosition = new Vector2(-90, -176);
+        cr.localScale = new Vector3(1.2f, 1.2f, 1.2f);
         Image ci = cb.AddComponent<Image>();
         if (btnSprite != null) ci.sprite = btnSprite; else ci.color = new Color(0.35f, 0.35f, 0.4f);
         Button cbtn = cb.AddComponent<Button>();
         cbtn.targetGraphic = ci;
         MkText("Text", cb.transform, "关闭", 22, font, Color.white, Vector2.zero, Vector2.zero, true);
+
+        // 保存游戏按钮
+        CreatePanelButton(panel.transform, "SaveGameButton", "保存游戏", new Vector2(90, -176), new Vector3(1.2f, 1.2f, 1.2f), font, btnSprite);
+
+        // 返回主菜单按钮
+        CreatePanelButton(panel.transform, "ExitGameButton", "返回主菜单", new Vector2(0, -220), new Vector3(1.0f, 1.0f, 1.0f), font, btnSprite);
 
         return overlay.transform;
     }
@@ -206,6 +247,7 @@ public class GameSettings : MonoBehaviour
         GameObject go = NewGO(n, p);
         TextMeshProUGUI tmp = go.AddComponent<TextMeshProUGUI>();
         tmp.text = t; tmp.fontSize = s; tmp.alignment = TextAlignmentOptions.Center; tmp.color = c;
+        tmp.raycastTarget = false;
         if (f != null) tmp.font = f;
         RectTransform r = go.GetComponent<RectTransform>();
         r.anchorMin = r.anchorMax = new Vector2(0.5f, 0.5f);
@@ -257,5 +299,308 @@ public class GameSettings : MonoBehaviour
         handleRect.anchoredPosition = new Vector2(w * value, 0);
         fillRect.sizeDelta = new Vector2(-w + w * value, 0);
         if (label != null) label.text = Mathf.RoundToInt(value * 100).ToString();
+    }
+
+    // ====== 独立存档面板 ======
+
+    private void EnsureSaveOverlay()
+    {
+        if (saveOverlay != null) return;
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null) return;
+
+        TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/朱雀仿宋 SDF");
+        Sprite btnSprite = Resources.Load<Sprite>("Pictures/UI/button_ready_off");
+
+        saveOverlay = NewGO("SaveOverlay", canvas.transform);
+        saveOverlay.transform.SetAsLastSibling();
+        SetFull(saveOverlay.GetComponent<RectTransform>());
+        Image overlayImg = saveOverlay.AddComponent<Image>();
+        overlayImg.color = new Color(0, 0, 0, 0.85f);
+
+        // 标题
+        MkText("Title", saveOverlay.transform, "存档", 40, font, Color.white, new Vector2(0, 180), new Vector2(200, 50), true);
+
+        // 返回按钮（左上角）
+        GameObject backBtn = NewGO("BackButton", saveOverlay.transform);
+        RectTransform backR = backBtn.GetComponent<RectTransform>();
+        backR.anchorMin = new Vector2(0, 1); backR.anchorMax = new Vector2(0, 1);
+        backR.pivot = new Vector2(0, 1);
+        backR.sizeDelta = new Vector2(120, 45);
+        backR.anchoredPosition = new Vector2(30, -30);
+        Image backImg = backBtn.AddComponent<Image>();
+        if (btnSprite != null) backImg.sprite = btnSprite; else backImg.color = new Color(0.3f, 0.3f, 0.35f);
+        Button backButton = backBtn.AddComponent<Button>();
+        backButton.targetGraphic = backImg;
+        backButton.onClick.AddListener(HideSaveOverlay);
+        GameObject backText = NewGO("Text", backBtn.transform);
+        TextMeshProUGUI backTmp = backText.AddComponent<TextMeshProUGUI>();
+        backTmp.text = "← 返回"; backTmp.fontSize = 22; backTmp.alignment = TextAlignmentOptions.Center;
+        backTmp.color = Color.white; backTmp.raycastTarget = false;
+        if (font != null) backTmp.font = font;
+        RectTransform backTR = backTmp.GetComponent<RectTransform>();
+        backTR.anchorMin = Vector2.zero; backTR.anchorMax = Vector2.one;
+        backTR.sizeDelta = Vector2.zero;
+
+        // 3 个槽位
+        for (int i = 0; i < SaveLoadManager.MAX_SLOTS; i++)
+            CreateSaveSlot(saveOverlay.transform, i, font, btnSprite);
+
+        saveOverlay.SetActive(false);
+    }
+
+    private void CreateSaveSlot(Transform parent, int slot, TMP_FontAsset font, Sprite btnSprite)
+    {
+        float yPos = 90 - slot * 90;
+
+        GameObject slotGo = NewGO($"Slot{slot}", parent);
+        RectTransform slotR = slotGo.GetComponent<RectTransform>();
+        slotR.anchorMin = slotR.anchorMax = new Vector2(0.5f, 0.5f);
+        slotR.sizeDelta = new Vector2(420, 60);
+        slotR.anchoredPosition = new Vector2(0, yPos);
+        Image slotImg = slotGo.AddComponent<Image>();
+        slotImg.color = new Color(0.25f, 0.22f, 0.18f, 0.9f);
+        Button slotBtn = slotGo.AddComponent<Button>();
+        slotBtn.targetGraphic = slotImg;
+
+        // 标签文字
+        GameObject labelGo = NewGO("Label", slotGo.transform);
+        TextMeshProUGUI label = labelGo.AddComponent<TextMeshProUGUI>();
+        label.fontSize = 24; label.alignment = TextAlignmentOptions.Center; label.color = Color.white;
+        label.raycastTarget = false;
+        if (font != null) label.font = font;
+        RectTransform labelR = label.GetComponent<RectTransform>();
+        labelR.anchorMin = Vector2.zero; labelR.anchorMax = Vector2.one;
+        labelR.sizeDelta = Vector2.zero;
+        UpdateSlotLabel(slot, label);
+
+        int capturedSlot = slot;
+        slotBtn.onClick.AddListener(() => OnSaveSlotClicked(capturedSlot));
+
+        // 操作栏（初始隐藏）
+        GameObject actionBar = NewGO("ActionBar", slotGo.transform);
+        RectTransform abR = actionBar.GetComponent<RectTransform>();
+        abR.anchorMin = new Vector2(0, 0); abR.anchorMax = new Vector2(1, 0);
+        abR.pivot = new Vector2(0.5f, 0);
+        abR.sizeDelta = new Vector2(0, 55);
+        abR.anchoredPosition = new Vector2(0, -60);
+        actionBar.SetActive(false);
+
+        CreateSmallButton(actionBar.transform, "OverwriteBtn", "覆盖存档", new Vector2(-140, 0), font, btnSprite,
+            () => { OnOverwriteSave(capturedSlot); OnSaveSlotClicked(capturedSlot); });
+
+        CreateSmallButton(actionBar.transform, "LoadBtn", "读取存档", new Vector2(0, 0), font, btnSprite,
+            () => OnLoadSaveInGame(capturedSlot));
+
+        CreateSmallButton(actionBar.transform, "DeleteBtn", "删除存档", new Vector2(140, 0), font, btnSprite,
+            () => { OnDeleteSaveInGame(capturedSlot); UpdateSlotLabel(capturedSlot, label); OnSaveSlotClicked(capturedSlot); });
+    }
+
+    private void CreateSmallButton(Transform parent, string name, string text, Vector2 pos, TMP_FontAsset font, Sprite btnSprite, UnityEngine.Events.UnityAction onClick)
+    {
+        GameObject go = NewGO(name, parent);
+        RectTransform r = go.GetComponent<RectTransform>();
+        r.anchorMin = r.anchorMax = new Vector2(0.5f, 0.5f);
+        r.sizeDelta = new Vector2(120, 40);
+        r.anchoredPosition = pos;
+        Image img = go.AddComponent<Image>();
+        if (btnSprite != null) img.sprite = btnSprite; else img.color = new Color(0.4f, 0.35f, 0.3f);
+        Button btn = go.AddComponent<Button>();
+        btn.targetGraphic = img;
+        btn.onClick.AddListener(onClick);
+
+        GameObject txtGo = NewGO("Text", go.transform);
+        TextMeshProUGUI tmp = txtGo.AddComponent<TextMeshProUGUI>();
+        tmp.text = text; tmp.fontSize = 16; tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = Color.white; tmp.raycastTarget = false;
+        if (font != null) tmp.font = font;
+        RectTransform tr = tmp.GetComponent<RectTransform>();
+        tr.anchorMin = Vector2.zero; tr.anchorMax = Vector2.one;
+        tr.sizeDelta = Vector2.zero;
+    }
+
+    private void UpdateSlotLabel(int slot, TextMeshProUGUI label)
+    {
+        if (SaveLoadManager.HasSave(slot))
+        {
+            SaveData data = SaveLoadManager.LoadSave(slot);
+            label.text = $"档位 {slot + 1}  -  {data.saveTime}";
+        }
+        else
+        {
+            label.text = $"档位 {slot + 1}  -  空白";
+        }
+    }
+
+    private void OnSaveSlotClicked(int slot)
+    {
+        EnsureSaveOverlay();
+        if (saveOverlay == null) return;
+
+        // 空槽位：直接保存
+        if (!SaveLoadManager.HasSave(slot))
+        {
+            OnOverwriteSave(slot);
+            // 刷新该槽位标签显示时间
+            Transform slotT = saveOverlay.transform.Find($"Slot{slot}");
+            if (slotT != null)
+            {
+                Transform labelT = slotT.Find("Label");
+                if (labelT != null)
+                {
+                    TextMeshProUGUI tmp = labelT.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null) UpdateSlotLabel(slot, tmp);
+                }
+            }
+            return;
+        }
+
+        // 有存档：展开/收起操作栏
+        // 收起之前展开的槽位
+        if (expandedSlot >= 0 && expandedSlot != slot)
+        {
+            Transform oldSlot = saveOverlay.transform.Find($"Slot{expandedSlot}");
+            if (oldSlot != null)
+            {
+                Transform oldBar = oldSlot.Find("ActionBar");
+                if (oldBar != null) oldBar.gameObject.SetActive(false);
+            }
+        }
+
+        Transform slotT2 = saveOverlay.transform.Find($"Slot{slot}");
+        if (slotT2 == null) return;
+        Transform bar = slotT2.Find("ActionBar");
+        if (bar == null) return;
+
+        bool isNowExpanded = !bar.gameObject.activeSelf;
+        bar.gameObject.SetActive(isNowExpanded);
+        expandedSlot = isNowExpanded ? slot : -1;
+    }
+
+    private void OnOverwriteSave(int slot)
+    {
+        SaveData data = SaveLoadManager.CaptureCurrentState();
+        SaveLoadManager.SaveGame(slot, data);
+        saveCounters[slot]++;
+        PlayerPrefs.SetInt(SAVE_COUNT_KEY + slot, saveCounters[slot]);
+        PlayerPrefs.Save();
+
+        // 验证存档内容
+        Debug.Log($"[存档] 档位{slot+1}: 玩家位置=({data.playerPosX:F1},{data.playerPosY:F1},{data.playerPosZ:F1}), 建筑数={data.buildings.Count}, 员工数={data.employees.Count}, 资源银两={data.silver}");
+
+        EnsureSaveOverlay();
+        if (saveOverlay != null)
+        {
+            Transform slotT = saveOverlay.transform.Find($"Slot{slot}");
+            if (slotT != null)
+            {
+                Transform labelT = slotT.Find("Label");
+                if (labelT != null)
+                {
+                    TextMeshProUGUI tmp = labelT.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null) UpdateSlotLabel(slot, tmp);
+                }
+            }
+        }
+        Debug.Log($"游戏已保存到档位 {slot + 1}");
+    }
+
+    private void OnLoadSaveInGame(int slot)
+    {
+        if (!SaveLoadManager.HasSave(slot)) return;
+        SaveLoadManager.PendingLoadData = SaveLoadManager.LoadSave(slot);
+
+        if (GamePauseManager.Instance != null)
+            GamePauseManager.Instance.RequestResume();
+
+        // DestroyImmediate ensures DontDestroyOnLoad objects are fully
+        // destroyed before Scene1 reloads, preventing Awake race condition
+        if (GameManager.Instance != null)
+            Object.DestroyImmediate(GameManager.Instance.gameObject);
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Scene1");
+    }
+
+    private void OnDeleteSaveInGame(int slot)
+    {
+        SaveLoadManager.DeleteSave(slot);
+        saveCounters[slot] = 1;
+        PlayerPrefs.SetInt(SAVE_COUNT_KEY + slot, 1);
+        PlayerPrefs.Save();
+    }
+
+    private void ShowSaveOverlay()
+    {
+        if (settingsOverlay != null)
+            settingsOverlay.SetActive(false);
+
+        EnsureSaveOverlay();
+        if (saveOverlay == null) return;
+
+        for (int i = 0; i < SaveLoadManager.MAX_SLOTS; i++)
+        {
+            Transform slotT = saveOverlay.transform.Find($"Slot{i}");
+            if (slotT != null)
+            {
+                Transform labelT = slotT.Find("Label");
+                if (labelT != null)
+                {
+                    TextMeshProUGUI tmp = labelT.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null) UpdateSlotLabel(i, tmp);
+                }
+                Transform bar = slotT.Find("ActionBar");
+                if (bar != null) bar.gameObject.SetActive(false);
+            }
+        }
+        expandedSlot = -1;
+        saveOverlay.SetActive(true);
+    }
+
+    private void HideSaveOverlay()
+    {
+        if (saveOverlay != null)
+            saveOverlay.SetActive(false);
+
+        if (expandedSlot >= 0 && saveOverlay != null)
+        {
+            Transform slotT = saveOverlay.transform.Find($"Slot{expandedSlot}");
+            if (slotT != null)
+            {
+                Transform bar = slotT.Find("ActionBar");
+                if (bar != null) bar.gameObject.SetActive(false);
+            }
+            expandedSlot = -1;
+        }
+
+        if (settingsOverlay != null)
+            settingsOverlay.SetActive(true);
+    }
+
+    // ====== 通用按钮创建 ======
+
+    private void CreatePanelButton(Transform parent, string name, string text, Vector2 pos, Vector3 scale, TMP_FontAsset font, Sprite btnSprite)
+    {
+        GameObject go = NewGO(name, parent);
+        RectTransform r = go.GetComponent<RectTransform>();
+        r.anchorMin = r.anchorMax = new Vector2(0.5f, 0.5f);
+        r.sizeDelta = new Vector2(150, 50);
+        r.anchoredPosition = pos;
+        r.localScale = scale;
+        Image img = go.AddComponent<Image>();
+        if (btnSprite != null) img.sprite = btnSprite; else img.color = new Color(0.35f, 0.35f, 0.4f);
+        Button btn = go.AddComponent<Button>();
+        btn.targetGraphic = img;
+        MkText("Text", go.transform, text, 20, font, Color.white, Vector2.zero, Vector2.zero, true);
+    }
+
+    // ====== 退出 ======
+
+    private void OnExitToMenu()
+    {
+        if (GamePauseManager.Instance != null)
+            GamePauseManager.Instance.RequestResume();
+        if (GameManager.Instance != null)
+            Object.Destroy(GameManager.Instance.gameObject);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Scene0");
     }
 }

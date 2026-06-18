@@ -117,6 +117,39 @@ public class GameManager : MonoBehaviour
         return employeeList.Find(emp => emp.uid == uid);
     }
 
+    public void ClearAllEmployees()
+    {
+        employeeList.Clear();
+    }
+
+    public void RestoreEmployee(EmployeeSaveEntry entry)
+    {
+        EmployeeData emp = new EmployeeData()
+        {
+            uid = entry.uid,
+            id = entry.id,
+            employeeName = entry.employeeName,
+            avatarSprite = null,
+            cost = 0,
+            jobType = (EmployeeJobType)entry.jobType,
+            assignedBuildingUID = entry.assignedBuildingUID
+        };
+        // Restore avatarSprite and npcPrefab from employeeTable
+        if (employeeTable != null)
+        {
+            foreach (var item in employeeTable.DataList)
+            {
+                if (item.id == entry.id)
+                {
+                    emp.avatarSprite = item.avatarSprite;
+                    emp.npcPrefab = item.npcPrefab;
+                    break;
+                }
+            }
+        }
+        employeeList.Add(emp);
+    }
+
     public EmployeeData GetCurrentCandidate() => currentCandidate;
 
     public List<EmployeeData> GetIdleEmployeesByJobType(EmployeeJobType jobType)

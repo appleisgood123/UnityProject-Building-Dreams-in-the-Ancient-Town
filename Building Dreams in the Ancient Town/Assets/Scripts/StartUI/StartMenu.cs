@@ -14,6 +14,8 @@ public class StartMenu : MonoBehaviour
     private TextMeshProUGUI sfxValueText;
     private VideoPlayer bgVideoPlayer;
 
+    private LoadPanelController loadPanelController;
+
     private const string BGM_VOLUME_KEY = "BGM_Volume";
     private const string SFX_VOLUME_KEY = "SFX_Volume";
 
@@ -25,10 +27,20 @@ public class StartMenu : MonoBehaviour
         ApplyBGMVolume(PlayerPrefs.GetFloat(BGM_VOLUME_KEY, 0.5f));
         TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Fonts/朱雀仿宋 SDF");
 
-        // 给三个按钮添加黑色文字
+        // 给四个按钮添加黑色文字
         SetupButtonText("StartButton", "开始游戏", font);
+        SetupButtonText("LoadButton", "读档", font);
         SetupButtonText("SettingButton", "设置", font);
         SetupButtonText("ExitButton", "退出游戏", font);
+
+        // 绑定读档按钮
+        GameObject loadBtn = GameObject.Find("LoadButton");
+        if (loadBtn != null)
+        {
+            Button btn = loadBtn.GetComponent<Button>();
+            if (btn != null)
+                btn.onClick.AddListener(LoadGame);
+        }
 
         // 绑定设置按钮
         GameObject settingBtn = GameObject.Find("SettingButton");
@@ -41,6 +53,9 @@ public class StartMenu : MonoBehaviour
 
         // 查找 Hierarchy 中已生成的设置面板
         SetupSettingsPanelFromHierarchy();
+
+        // 初始化读档面板
+        loadPanelController = gameObject.AddComponent<LoadPanelController>();
     }
 
     private void SetupButtonText(string buttonName, string text, TMP_FontAsset font)
@@ -174,7 +189,14 @@ public class StartMenu : MonoBehaviour
 
     public void StartGame()
     {
+        SaveLoadManager.PendingLoadData = null; // 新游戏不清除存档数据
         StartCoroutine(PlayIntroSequence());
+    }
+
+    public void LoadGame()
+    {
+        if (loadPanelController != null)
+            loadPanelController.Show();
     }
 
     private IEnumerator PlayIntroSequence()
