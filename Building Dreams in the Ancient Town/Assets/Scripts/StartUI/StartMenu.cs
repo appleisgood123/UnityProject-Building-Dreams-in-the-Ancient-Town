@@ -29,7 +29,7 @@ public class StartMenu : MonoBehaviour
 
         // 给四个按钮添加黑色文字
         SetupButtonText("StartButton", "开始游戏", font);
-        SetupButtonText("LoadButton", "读档", font);
+        SetupButtonText("LoadButton", "读取存档", font);
         SetupButtonText("SettingButton", "设置", font);
         SetupButtonText("ExitButton", "退出游戏", font);
 
@@ -216,65 +216,15 @@ public class StartMenu : MonoBehaviour
             if (bgRawImage != null) bgRawImage.enabled = false;
         }
 
-        yield return PlayVideo("Video/开始1");
-        yield return PlayVideo("Video/开始2");
+        // 渐黑
+        Image fadeImg = CreateFadeOverlay();
+        yield return Fade(fadeImg, 0f, 1f, 0.8f);
+
+        // 开始1 和 开始2（视频层级高于黑屏，直接可见）
+        yield return PlayVideoOnFade("Video/开始1");
+        yield return PlayVideoOnFade("Video/开始2");
 
         SceneManager.LoadScene("Scene1");
-    }
-
-    private IEnumerator PlayVideo(string resourcePath)
-    {
-        VideoClip clip = Resources.Load<VideoClip>(resourcePath);
-        if (clip == null)
-        {
-            Debug.LogWarning($"未找到视频: {resourcePath}，跳过");
-            yield break;
-        }
-
-        GameObject canvasObj = new GameObject("IntroVideoCanvas", typeof(Canvas));
-        Canvas canvas = canvasObj.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 1000;
-
-        GameObject blockerObj = new GameObject("Blocker", typeof(RectTransform), typeof(Image));
-        blockerObj.transform.SetParent(canvasObj.transform, false);
-        Image blockerImage = blockerObj.GetComponent<Image>();
-        blockerImage.color = new Color(0, 0, 0, 0);
-        blockerImage.raycastTarget = true;
-        RectTransform blockerRect = blockerObj.GetComponent<RectTransform>();
-        blockerRect.anchorMin = Vector2.zero;
-        blockerRect.anchorMax = Vector2.one;
-        blockerRect.sizeDelta = Vector2.zero;
-
-        GameObject rawImageObj = new GameObject("RawImage", typeof(RectTransform), typeof(RawImage));
-        rawImageObj.transform.SetParent(canvasObj.transform, false);
-        rawImageObj.transform.SetAsFirstSibling();
-        RectTransform rectTransform = rawImageObj.GetComponent<RectTransform>();
-        rectTransform.anchorMin = Vector2.zero;
-        rectTransform.anchorMax = Vector2.one;
-        rectTransform.sizeDelta = Vector2.zero;
-        RawImage rawImage = rawImageObj.GetComponent<RawImage>();
-
-        VideoPlayer vp = canvasObj.AddComponent<VideoPlayer>();
-        vp.source = VideoSource.VideoClip;
-        vp.clip = clip;
-        vp.renderMode = VideoRenderMode.RenderTexture;
-        vp.audioOutputMode = VideoAudioOutputMode.Direct;
-
-        RenderTexture rt = new RenderTexture(1920, 1080, 0);
-        vp.targetTexture = rt;
-        rawImage.texture = rt;
-
-        bool finished = false;
-        vp.loopPointReached += (source) => finished = true;
-        vp.Play();
-
-        yield return new WaitUntil(() => finished);
-
-        vp.Stop();
-        rt.Release();
-        Destroy(rt);
-        Destroy(canvasObj);
     }
 
     // ==================== 设置面板控制 ====================
@@ -291,6 +241,72 @@ public class StartMenu : MonoBehaviour
             AudioManager.Instance.PlaySFX("普通点击");
 
         settingsOverlay.SetActive(!settingsOverlay.activeSelf);
+    }
+
+    // ====== 视频播放 + 渐黑辅助 ======
+
+    private Image CreateFadeOverlay()
+    {
+        GameObject go = new GameObject("FadeCanvas", typeof(Canvas), typeof(Image));
+        Canvas c = go.GetComponent<Canvas>();
+        c.renderMode = RenderMode.ScreenSpaceOverlay;
+        c.sortingOrder = 999;
+        Image img = go.GetComponent<Image>();
+        img.color = new Color(0, 0, 0, 0);
+        img.raycastTarget = true;
+        RectTransform r = go.GetComponent<RectTransform>();
+        r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one;
+        r.sizeDelta = Vector2.zero;
+        return img;
+    }
+
+    private IEnumerator Fade(Image img, float from, float to, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            img.color = new Color(0, 0, 0, Mathf.Lerp(from, to, elapsed / duration));
+            yield return null;
+        }
+        img.color = new Color(0, 0, 0, to);
+    }
+
+    private IEnumerator PlayVideoOnFade(string resourcePath)
+    {
+        VideoClip clip = Resources.Load<VideoClip>(resourcePath);
+        if (clip == null) { Debug.LogWarning($"未找到视频: {resourcePath}"); yield break; }
+
+        GameObject canvasObj = new GameObject("VideoCanvas", typeof(Canvas));
+        Canvas canvas = canvasObj.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 1000;
+
+        GameObject rawObj = new GameObject("RawImage", typeof(RectTransform), typeof(RawImage));
+        rawObj.transform.SetParent(canvasObj.transform, false);
+        RectTransform rt = rawObj.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.sizeDelta = Vector2.zero;
+        RawImage rawImage = rawObj.GetComponent<RawImage>();
+
+        VideoPlayer vp = canvasObj.AddComponent<VideoPlayer>();
+        vp.source = VideoSource.VideoClip;
+        vp.clip = clip;
+        vp.renderMode = VideoRenderMode.RenderTexture;
+        vp.audioOutputMode = VideoAudioOutputMode.Direct;
+
+        RenderTexture renderTex = new RenderTexture(1920, 1080, 0);
+        vp.targetTexture = renderTex;
+        rawImage.texture = renderTex;
+
+        bool finished = false;
+        vp.loopPointReached += (source) => finished = true;
+        vp.Play();
+        yield return new WaitUntil(() => finished);
+
+        vp.Stop();
+        renderTex.Release();
+        Destroy(renderTex);
+        Destroy(canvasObj);
     }
 
     /// <summary>应用 BGM 音量：开始界面视频 + 保存到 PlayerPrefs（Scene1 的 ResourceManager 启动时读取）</summary>

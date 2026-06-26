@@ -95,7 +95,7 @@ namespace Cinemachine.Examples
             // 移动音效切换
             UpdateMovementSound();
 
-            // ԭʼ��ת/�ƶ��߼�
+            // 原始旋转/移动逻辑
             var tr = useCharacterForward ? transform : mainCamera.transform;
             var right = tr.right;
             var forward = tr.forward;
@@ -112,7 +112,7 @@ namespace Cinemachine.Examples
                 rb.angularVelocity = Vector3.up * angle;
             }
 
-            // ̨��������⣨����ǰ�ƶ�ʱ��
+            // 台阶检测
             if (speed > 0.1f && input.y > 0.1f)
             {
                 TryStepUp();

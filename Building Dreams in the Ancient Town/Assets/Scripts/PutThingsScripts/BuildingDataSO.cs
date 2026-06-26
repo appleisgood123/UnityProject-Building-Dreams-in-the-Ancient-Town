@@ -13,36 +13,36 @@ public class BuildingDataSO : ScriptableObject
     public GameObject previewPrefab;
     public GameObject finalPrefab;
 
-    [Header("½¨ÔìÏûºÄ")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public int costSilver;
     public int costWood;
     public int costStone;
 
-    [Header("½âËøÌõ¼ş")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public int requiredHappiness;
     public BuildingDataSO requiredBuilding;
 
-    [Header("ÊÇ·ñĞèÒª¿Æ¼¼½âËø")]
+    [Header("ï¿½Ç·ï¿½ï¿½ï¿½Òªï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public bool requireTechUnlock;
 
-    [Header("ÊÕÒæ£¨Á¢¼´ÉúĞ§£©")]
+    [Header("ï¿½ï¿½ï¿½æ£¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½")]
     public int incomeHappiness;
     public int populationCapIncrease;
 
-    [Header("ÊÕÒæ£¨Ã¿ÔÂ£©")]
+    [Header("ï¿½ï¿½ï¿½æ£¨Ã¿ï¿½Â£ï¿½")]
     public int monthlySilver;
     public int monthlyWood;
     public int monthlyStone;
 
-    [Header("×ÊÔ´ÉÏÏŞÔö¼Ó£¨½ö²Ö¿âÀà½¨ÖşÓĞĞ§£©")]
+    [Header("ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½Ö¿ï¿½ï¿½à½¨ï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½")]
     public int woodCapIncrease;
     public int stoneCapIncrease;
 
-    [Header("Ô±¹¤ĞèÇó")]
+    [Header("Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public EmployeeJobType requiredEmployeeType;
     public int requiredEmployeeCount = 1;
     public bool requiresEmployeeToWork = true;
 
-    [Header("·ÅÖÃÉèÖÃ")]
-    public bool ignoreGroundCheck = false;   // ÇÅµÈÌØÊâ½¨Öş¿ÉºöÂÔµØÃæÏŞÖÆ
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
+    public bool ignoreGroundCheck = false;   // ï¿½Åµï¿½ï¿½ï¿½ï¿½â½¨ï¿½ï¿½ï¿½Éºï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }

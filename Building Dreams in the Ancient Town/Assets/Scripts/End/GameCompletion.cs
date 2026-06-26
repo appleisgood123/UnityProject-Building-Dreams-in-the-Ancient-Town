@@ -7,7 +7,7 @@ public class GameCompletion : MonoBehaviour
 {
     [Header("完成条件")]
     public float fadeDuration = 2f;
-    public int targetHappiness = 200;
+    public int targetHappiness = 300;
 
     private bool hasTriggered = false;
 

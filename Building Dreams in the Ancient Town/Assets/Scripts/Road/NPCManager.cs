@@ -7,21 +7,21 @@ public class Route
 {
     public Transform startPoint;
     public Transform endPoint;
-    [Tooltip("ÐèÒª´ïµ½µÄ×îµÍÐÒ¸£¶È£¬0±íÊ¾ÎÞÌõ¼þ")]
+    [Tooltip("ï¿½ï¿½Òªï¿½ïµ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò¸ï¿½ï¿½È£ï¿½0ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public int requiredHappiness = 0;
 }
 
 public class NPCManager : MonoBehaviour
 {
-    [Header("NPC Ô¤ÖÆÌåÁÐ±í")]
+    [Header("NPC Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½")]
     public List<GameObject> npcPrefabs;
 
-    [Header("ËùÓÐµÀÂ·ÁÐ±í£¨°üÀ¨ÐèÒª½âËøµÄ£©")]
-    public List<Route> allRoutes;   // Ô¤ÏÈÅäÖÃËùÓÐµÀÂ·£¬Ã¿Ìõ¿ÉÉèÖÃ requiredHappiness
+    [Header("ï¿½ï¿½ï¿½Ðµï¿½Â·ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½")]
+    public List<Route> allRoutes;   // Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½Â·ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ requiredHappiness
 
-    [Header("ÆäËûÉèÖÃ")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public float arriveDistance = 0.5f;
-    public float moveSpeed = 2f;    // NPC ÒÆ¶¯ËÙ¶È£¨¿ÉÍ³Ò»£¬Ò²¿ÉÈÃÔ¤ÖÆÌå¸÷×ÔÉèÖÃ£©
+    public float moveSpeed = 1f;    // NPC ï¿½Æ¶ï¿½ï¿½Ù¶È£ï¿½ï¿½ï¿½Í³Ò»ï¿½ï¿½Ò²ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½
 
     private List<GameObject> activeNPCs = new List<GameObject>();
     private List<Route> availableRoutes = new List<Route>();
@@ -42,11 +42,11 @@ public class NPCManager : MonoBehaviour
 
     private void OnResourcesChanged()
     {
-        UpdateAvailableRoutes();   // ÐÒ¸£¶È±ä»¯Ê±£¬ÖØÐÂÉ¸Ñ¡¿ÉÓÃµÀÂ·
-        UpdateNPCs();              // ÈË¿ÚÉÏÏÞ±ä»¯Ò²»á´¥·¢£¬Í¬Ê±Ò²»áÓ°ÏìNPCÊýÁ¿
+        UpdateAvailableRoutes();   // ï¿½Ò¸ï¿½ï¿½È±ä»¯Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¸Ñ¡ï¿½ï¿½ï¿½Ãµï¿½Â·
+        UpdateNPCs();              // ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½Þ±ä»¯Ò²ï¿½á´¥ï¿½ï¿½ï¿½ï¿½Í¬Ê±Ò²ï¿½ï¿½Ó°ï¿½ï¿½NPCï¿½ï¿½ï¿½ï¿½
     }
 
-    // ¸ù¾Ýµ±Ç°ÐÒ¸£¶ÈÉ¸Ñ¡¿ÉÓÃµÀÂ·
+    // ï¿½ï¿½ï¿½Ýµï¿½Ç°ï¿½Ò¸ï¿½ï¿½ï¿½É¸Ñ¡ï¿½ï¿½ï¿½Ãµï¿½Â·
     private void UpdateAvailableRoutes()
     {
         availableRoutes.Clear();
@@ -60,7 +60,7 @@ public class NPCManager : MonoBehaviour
         }
 
         if (availableRoutes.Count == 0)
-            Debug.LogWarning("µ±Ç°Ã»ÓÐ¿ÉÓÃµÄµÀÂ·£¬Çë¼ì²éÅäÖÃ»òÐÒ¸£¶È");
+            Debug.LogWarning("ï¿½ï¿½Ç°Ã»ï¿½Ð¿ï¿½ï¿½ÃµÄµï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ò¸ï¿½ï¿½ï¿½");
     }
 
     private void UpdateNPCs()
@@ -78,13 +78,13 @@ public class NPCManager : MonoBehaviour
     {
         if (npcPrefabs == null || npcPrefabs.Count == 0 || availableRoutes.Count == 0)
         {
-            Debug.LogWarning("NPCManager: È±ÉÙÔ¤ÖÆÌå»ò¿ÉÓÃµÀÂ·");
+            Debug.LogWarning("NPCManager: È±ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½Â·");
             return;
         }
 
-        // Ëæ»úÑ¡Ôñ NPC Ô¤ÖÆÌå
+        // ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ NPC Ô¤ï¿½ï¿½ï¿½ï¿½
         GameObject selectedPrefab = npcPrefabs[Random.Range(0, npcPrefabs.Count)];
-        // Ëæ»úÑ¡ÔñÒ»Ìõ¿ÉÓÃµÀÂ·
+        // ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½Â·
         Route selectedRoute = availableRoutes[Random.Range(0, availableRoutes.Count)];
 
         GameObject npc = Instantiate(selectedPrefab);
@@ -96,11 +96,11 @@ public class NPCManager : MonoBehaviour
             walker.startPoint = selectedRoute.startPoint;
             walker.endPoint = selectedRoute.endPoint;
             walker.arriveDistance = arriveDistance;
-            walker.moveSpeed = moveSpeed;   // ¿ÉÑ¡£ºÊ¹ÓÃÍ³Ò»ËÙ¶È
+            walker.moveSpeed = moveSpeed;   // ï¿½ï¿½Ñ¡ï¿½ï¿½Ê¹ï¿½ï¿½Í³Ò»ï¿½Ù¶ï¿½
         }
         else
         {
-            Debug.LogError($"NPC Ô¤ÖÆÌå {selectedPrefab.name} È±ÉÙ SimpleWalker ×é¼þ£¡");
+            Debug.LogError($"NPC Ô¤ï¿½ï¿½ï¿½ï¿½ {selectedPrefab.name} È±ï¿½ï¿½ SimpleWalker ï¿½ï¿½ï¿½ï¿½ï¿½");
             Destroy(npc);
             return;
         }

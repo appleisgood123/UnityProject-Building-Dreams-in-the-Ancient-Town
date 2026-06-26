@@ -18,7 +18,7 @@ public static class AutoCreateSettingsUI
 
     private static void OnSceneOpened(Scene scene, OpenSceneMode mode)
     {
-        if (scene.name != "Scene0" && scene.name != "Scene1") return;
+        if (scene.name != "Scene0") return;
         string key = $"AutoCreateSettingsUI_Done_{scene.name}";
         if (EditorPrefs.GetBool(key, false)) return;
 
@@ -31,7 +31,7 @@ public static class AutoCreateSettingsUI
 
     private static void CreateSettingsUI()
     {
-        Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+        Canvas canvas = GameObject.Find("Canvas")?.GetComponent<Canvas>();
         if (canvas == null)
         {
             Debug.LogWarning("AutoCreateSettingsUI: 未找到 Canvas");

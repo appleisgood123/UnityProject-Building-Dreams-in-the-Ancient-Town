@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
 {
     private static GameManager _instance;
 
-    [Header("Êı¾İ±íÒıÓÃ")]
+    [Header("ï¿½ï¿½ï¿½İ±ï¿½ï¿½ï¿½ï¿½ï¿½")]
     public EmployeeTable employeeTable;
 
     private EmployeeData currentCandidate;
@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
     public EmployeeTable GetEmployeeTable()
     {
         if (employeeTable == null)
-            Debug.LogError("GameManager: employeeTable Î´ÔÚ Inspector ÖĞ¸³Öµ£¡");
+            Debug.LogError("GameManager: employeeTable Î´ï¿½ï¿½ Inspector ï¿½Ğ¸ï¿½Öµï¿½ï¿½");
         return employeeTable;
     }
 
@@ -72,22 +72,22 @@ public class GameManager : MonoBehaviour
     {
         if (currentCandidate == null) return false;
 
-        // ¼ì²éÈË¿ÚÉÏÏŞ
+        // ï¿½ï¿½ï¿½ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½
         int currentPopulation = employeeList.Count;
         if (currentPopulation >= ResourceManager.Instance.PopulationCap)
         {
-            Debug.LogWarning($"ÈË¿ÚÒÑ´ïÉÏÏŞ ({currentPopulation}/{ResourceManager.Instance.PopulationCap})£¬ÎŞ·¨¼ÌĞøÕĞÄ¼");
+            Debug.LogWarning($"ï¿½Ë¿ï¿½ï¿½Ñ´ï¿½ï¿½ï¿½ï¿½ï¿½ ({currentPopulation}/{ResourceManager.Instance.PopulationCap})ï¿½ï¿½ï¿½Ş·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼");
             return false;
         }
 
         int cost = currentCandidate.cost;
         if (!ResourceManager.Instance.SpendResources(cost, 0, 0))
         {
-            Debug.LogWarning($"ÒøÁ½²»×ã£¬ĞèÒª {cost}£¬µ±Ç° {ResourceManager.Instance.Silver}");
+            Debug.LogWarning($"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½Òª {cost}ï¿½ï¿½ï¿½ï¿½Ç° {ResourceManager.Instance.Silver}");
             return false;
         }
 
-        // ÕĞÄ¼Âß¼­...
+        // ï¿½ï¿½Ä¼ï¿½ß¼ï¿½...
         EmployeeData newEmployee = new EmployeeData()
         {
             uid = currentCandidate.uid,
@@ -134,7 +134,7 @@ public class GameManager : MonoBehaviour
             jobType = (EmployeeJobType)entry.jobType,
             assignedBuildingUID = entry.assignedBuildingUID
         };
-        // Restore avatarSprite and npcPrefab from employeeTable
+        // ä» employeeTable æ¢å¤ avatarSpriteã€npcPrefab å’Œ cost
         if (employeeTable != null)
         {
             foreach (var item in employeeTable.DataList)
@@ -143,6 +143,7 @@ public class GameManager : MonoBehaviour
                 {
                     emp.avatarSprite = item.avatarSprite;
                     emp.npcPrefab = item.npcPrefab;
+                    emp.cost = item.cost;
                     break;
                 }
             }

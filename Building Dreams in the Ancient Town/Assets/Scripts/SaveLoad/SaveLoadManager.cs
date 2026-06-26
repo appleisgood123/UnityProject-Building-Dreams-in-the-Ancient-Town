@@ -17,8 +17,16 @@ public static class SaveLoadManager
     {
         string path = SavePath(slot);
         if (!File.Exists(path)) return null;
-        string json = File.ReadAllText(path);
-        return JsonUtility.FromJson<SaveData>(json);
+        try
+        {
+            string json = File.ReadAllText(path);
+            return JsonUtility.FromJson<SaveData>(json);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[存档] 读取存档 {slot} 失败: {e.Message}");
+            return null;
+        }
     }
 
     public static void SaveGame(int slot, SaveData data)
@@ -26,7 +34,14 @@ public static class SaveLoadManager
         data.slotIndex = slot;
         data.saveTime = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm");
         string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(SavePath(slot), json);
+        try
+        {
+            File.WriteAllText(SavePath(slot), json);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[存档] 保存存档 {slot} 失败: {e.Message}");
+        }
     }
 
     public static void DeleteSave(int slot)
@@ -135,32 +150,17 @@ public static class SaveLoadManager
 
     public static void ApplySaveData(SaveData data)
     {
-        // Resources
+        // 1. Resources
         if (ResourceManager.Instance != null)
             ResourceManager.Instance.LoadFromSaveData(data);
 
-        // Time
+        // 2. Time
         if (GameMonthManager.Instance != null)
             GameMonthManager.Instance.SetTotalMonths(data.totalMonths);
 
-        // Tech
-        if (TechManager.Instance != null)
-            TechManager.Instance.LoadUnlockedTechs(data.unlockedTechNames);
-
-        // Buildings - destroy all existing BuildingInstance objects, then restore
+        // 3. Buildings — 先清除再恢复（清除和恢复都由 BuildingManager 统一管理）
         if (BuildingManager.Instance != null)
         {
-            // Destroy ALL scene building instances (both pre-placed and runtime)
-            BuildingInstance[] existingInstances = Object.FindObjectsOfType<BuildingInstance>();
-            foreach (var inst in existingInstances)
-            {
-                if (inst != null)
-                {
-                    if (inst.currentNPC != null)
-                        Object.Destroy(inst.currentNPC);
-                    Object.Destroy(inst.gameObject);
-                }
-            }
             BuildingManager.Instance.ClearAllBuildings();
             foreach (var entry in data.buildings)
             {
@@ -174,7 +174,15 @@ public static class SaveLoadManager
             }
         }
 
-        // Employees
+        // 4. Tech — 在建筑恢复后解锁（这样 AddHappinessBonus 能找到已建造的建筑）
+        if (TechManager.Instance != null)
+            TechManager.Instance.LoadUnlockedTechs(data.unlockedTechNames);
+
+        // 4b. 兜底：重新应用科技幸福感加成到所有已恢复建筑
+        if (BuildingManager.Instance != null)
+            BuildingManager.Instance.ReapplyAllTechHappinessBonuses();
+
+        // 5. Employees
         if (GameManager.Instance != null)
         {
             GameManager.Instance.ClearAllEmployees();
@@ -184,11 +192,11 @@ public static class SaveLoadManager
             }
         }
 
-        // Tasks
+        // 6. Tasks
         if (TaskManager.Instance != null)
             TaskManager.Instance.LoadFromSaveData(data.activeTaskNames, data.completedTaskNames);
 
-        // Player position (do last - after buildings are placed)
+        // 7. Player position (do last - after buildings are placed)
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {

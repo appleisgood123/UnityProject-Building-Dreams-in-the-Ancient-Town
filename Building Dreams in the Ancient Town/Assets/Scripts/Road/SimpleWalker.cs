@@ -4,7 +4,7 @@ public class SimpleWalker : MonoBehaviour
 {
     public Transform startPoint;
     public Transform endPoint;
-    public float moveSpeed = 2f;
+    public float moveSpeed = 1f;
     public float arriveDistance = 0.5f;
 
     private bool movingToEnd = true;
@@ -34,9 +34,9 @@ public class SimpleWalker : MonoBehaviour
             {
                 transform.position = startPoint.position;
                 transform.forward = (endPoint.position - startPoint.position).normalized;
-                // ¼ÌÐøÏòÖÕµãÒÆ¶¯
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õµï¿½ï¿½Æ¶ï¿½
             }
-            // Èç¹ûÏ£ÍûÀ´»Ø×ß£¬¿ÉÔÚ´Ë´¦ÇÐ»» movingToEnd£¬µ«ÕâÀï°´µ¥ÏòÑ­»·ÊµÏÖ
+            // ï¿½ï¿½ï¿½Ï£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½Ú´Ë´ï¿½ï¿½Ð»ï¿½ movingToEndï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï°´ï¿½ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½Êµï¿½ï¿½
         }
     }
 }
